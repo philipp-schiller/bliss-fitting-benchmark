@@ -100,6 +100,24 @@ def run_experiment(
 
         for fitter_index, fitter in enumerate(config.fitters):
             try:
+
+                # we give the exact parameters to the exact BLISS version if there
+                if getattr(fitter, "name", None) == "BLISS_exact":
+                    fitter.source_density.fixed_params = np.asarray(
+                        config.source_params,
+                        dtype=float,
+                    ).copy()
+
+                    noise_params = np.asarray(
+                        config.noise_params,
+                        dtype=float,
+                    )
+
+                    if noise_params.size == 1:
+                        noise_params = float(noise_params.item())
+
+                    fitter.noise_function.fixed_params = noise_params
+
                 start = time.perf_counter()
 
                 fitted_params = fitter.fit(

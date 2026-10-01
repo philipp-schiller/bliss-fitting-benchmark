@@ -269,3 +269,63 @@ def is_visible(t_vals: float | np.ndarray, params: np.array, laser: np.ndarray) 
         result = ((t_arr >= t_1) & (t_arr <= 2 * np.pi)) | ((t_arr >= 0) & (t_arr <= t_2))
 
     return result
+
+import numpy as np
+
+
+def canonicalize_ellipse_params(
+    params: np.ndarray,
+) -> np.ndarray:
+    """
+    Convert ellipse parameters to a canonical representation.
+
+    The input parameterization is:
+
+        [cx, cy, a, b, phi]
+
+    The returned representation satisfies:
+
+        a >= b
+        phi in [-pi/2, pi/2)
+
+    Swapping a and b requires adding pi/2 to phi because these
+    parameter combinations describe the same ellipse.
+
+    Parameters
+    ----------
+    params:
+        Ellipse parameter array with shape (5,).
+
+    Returns
+    -------
+    np.ndarray:
+        Canonical ellipse parameters with shape (5,).
+    """
+
+    params = np.asarray(params, dtype=float)
+
+    if params.shape != (5,):
+        raise ValueError(
+            "Expected ellipse parameters with shape (5,), "
+            f"but received {params.shape}."
+        )
+
+    cx, cy, a, b, phi = params
+
+    if not np.all(np.isfinite(params)):
+        return np.full(5, np.nan)
+
+    if a <= 0 or b <= 0:
+        raise ValueError(
+            "The ellipse semiaxes must be positive, "
+            f"but received a={a} and b={b}."
+        )
+
+    if b > a:
+        a, b = b, a
+        phi += np.pi / 2
+
+    # Ellipse orientation is pi-periodic.
+    phi = (phi + np.pi / 2) % np.pi - np.pi / 2
+
+    return np.array([cx, cy, a, b, phi])

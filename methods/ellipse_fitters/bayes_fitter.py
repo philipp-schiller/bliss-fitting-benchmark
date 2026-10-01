@@ -2,7 +2,7 @@ import numpy as np
 
 from methods.ellipse_fitters.base import BaseEllipseFitter
 from methods.ellipse_fitters.geometric_ls import _algebraic_ellipse_fit
-from methods.ellipse_fitters.ellipse_utils import get_ellipse_params
+from methods.ellipse_fitters.ellipse_utils import get_ellipse_params, canonicalize_ellipse_params
 
 from bayes_shape_fitting.inference.samplers.ecm_estimation import ECMOptimizer
 from bayes_shape_fitting.inference.likelihoods import MarginalLikelihood
@@ -61,13 +61,13 @@ class BayesFitter(BaseEllipseFitter):
         noise_init = noise_init if noise_init is not None else self.noise_init
         source_bounds = source_bounds if source_bounds is not None else self.source_bounds
         noise_bounds = noise_bounds if noise_bounds is not None else self.noise_bounds
-        shape = Ellipse()
+        shape = Ellipse_R()
 
         # --- 1. Initial fit  ---
         A, B, C, D, E, F = _algebraic_ellipse_fit(points)
         cx0, cy0, a0, b0, theta0 = get_ellipse_params(np.array([A, B, C, D, E, F]))
 
-        shape_init = np.array([cx0,cy0,a0,b0,theta0])
+        shape_init = canonicalize_ellipse_params(np.array([cx0,cy0,a0,b0,theta0]))
 
         likelihood = MarginalLikelihood(
             shape=shape,
@@ -76,10 +76,20 @@ class BayesFitter(BaseEllipseFitter):
             num_samples=300,
         )
 
+        shape_bounds = [
+            (-5, 5),  # x_c
+            (-5, 5),  # y_c
+            (0.5, 6),  # a (scale)
+            (0.3, 1.0),  # r ∈ [0,1]
+            (-np.pi/2, np.pi/2)  # rotation
+        ]
+
         fit_result = standard_fit(points=points, shape=shape, likelihood=likelihood, shape_init=shape_init,
-                         source_init=source_init, noise_init = noise_init,shape_bounds=shape.bounds,
+                         source_init=source_init, noise_init = noise_init,shape_bounds=shape_bounds,
                          source_bounds=source_bounds, noise_bounds = noise_bounds,
                          optimizer=optimizer)
 
-        #geom = convert_params_from_reparametrized_to_standard(fit_result.shape_params)
-        return fit_result.shape_params
+        return convert_params_from_reparametrized_to_standard(fit_result.shape_params)
+
+
+        #return canonicalize_ellipse_params(fit_result.shape_params)
