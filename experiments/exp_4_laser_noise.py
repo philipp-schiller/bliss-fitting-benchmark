@@ -33,7 +33,7 @@ from methods.ellipse_fitters.zhao_bayes import (
     BayesianEllipseFitterZhao,
 )
 
-RUN_EXPERIMENT = False
+RUN_EXPERIMENT = True
 
 # ---------------------------------------------------------------------------
 # Fixed experiment settings

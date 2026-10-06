@@ -15,10 +15,32 @@ from metrics.ellipse_metrics import (
 
 MetricReducer = Callable[[np.ndarray], float]
 
+# Distinguishable in both color and grayscale.
+MARKERS = [
+    "o",   # circle
+    "s",   # square
+    "^",   # triangle up
+    "D",   # diamond
+    "v",   # triangle down
+    "P",   # filled plus
+    "X",   # filled x
+    "*",   # star
+]
+
+LINESTYLES = [
+    "-",
+    "--",
+    "-.",
+    ":",
+    (0, (5, 1)),
+    (0, (3, 1, 1, 1)),
+    (0, (1, 1)),
+    (0, (5, 2, 1, 2)),
+]
 
 def trimmed_nanmean(
     values: np.ndarray,
-    proportion_to_cut: float = 0.1,
+    proportion_to_cut: float = 0,
 ) -> float:
     """
     Compute a trimmed mean after removing NaN and infinite values.
@@ -123,6 +145,16 @@ def plot_ellipse_sweep(
 
     sweep_values = sweep_data["values"]
 
+    methods = sweep_data["labels"]
+
+    method_styles = {
+        method: {
+            "marker": MARKERS[index % len(MARKERS)],
+            "linestyle": LINESTYLES[index % len(LINESTYLES)],
+        }
+        for index, method in enumerate(methods)
+    }
+
     fig, axes = plt.subplots(
         1,
         4,
@@ -154,10 +186,11 @@ def plot_ellipse_sweep(
         ax = axes[panel_index]
 
         for method, values in values_by_method.items():
+            style = method_styles[method]
             ax.plot(
                 sweep_values,
                 values,
-                marker="o",
+                marker=style["marker"],
                 linewidth=2,
                 label=method,
             )

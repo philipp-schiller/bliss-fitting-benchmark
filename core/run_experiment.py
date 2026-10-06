@@ -6,6 +6,7 @@ from tqdm import tqdm
 
 from core.experiment_config import ExperimentConfig
 from core.sweep_result import SweepResult
+from core.measurement import save_measurement
 
 
 def run_experiment(
@@ -76,26 +77,25 @@ def run_experiment(
             config.noise_params
         ).astype(float)
 
-        points, parameter_samples = config.get_measurement(
-            n_points=config.num_points
+        measurement = config.get_measurement(
+            iteration
         )
 
-        # Compute this once because every fitter receives the same
-        # measurement uncertainties.
-        uncertainties = config.noise_function.evaluate(
-            parameter_samples,
-            params=config.noise_params,
-        )
+        points = measurement.points
+        uncertainties = measurement.uncertainties
 
         if save_pointclouds:
             filename = (
                     pointcloud_directory
-                    / f"pointcloud_{config.name}_{iteration:04d}.npz"
+                    / (
+                        f"pointcloud_{config.name}_"
+                        f"{iteration:04d}.npz"
+                    )
             )
-            np.savez_compressed(
-            filename,
-            points=points,
-            parameter_samples=parameter_samples,
+
+            save_measurement(
+                measurement,
+                filename,
             )
 
         for fitter_index, fitter in enumerate(config.fitters):

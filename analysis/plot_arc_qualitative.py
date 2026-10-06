@@ -21,6 +21,7 @@ def plot_arc_qualitative(
     iteration_indices: list[int],
     save_directory: Path,
     show: bool = False,
+    png_name: str = None
 ) -> Path:
     """
     Plot individual ellipse fits for selected arc coverages.
@@ -254,24 +255,17 @@ def plot_arc_qualitative(
         exist_ok=True,
     )
 
+    if png_name is None:
+        png_name = "arc_qualitative.png"
+
     png_path = (
         save_directory
-        / "arc_qualitative.png"
-    )
-
-    pdf_path = (
-        save_directory
-        / "arc_qualitative.pdf"
+        / png_name
     )
 
     fig.savefig(
         png_path,
         dpi=600,
-        bbox_inches="tight",
-    )
-
-    fig.savefig(
-        pdf_path,
         bbox_inches="tight",
     )
 
@@ -281,7 +275,6 @@ def plot_arc_qualitative(
         plt.close(fig)
 
     print(f"Saved plot: {png_path}")
-    print(f"Saved plot: {pdf_path}")
 
     return png_path
 
@@ -289,32 +282,30 @@ def plot_arc_qualitative(
 if __name__ == "__main__":
     repository_root = Path(__file__).resolve().parents[1]
 
-    # One selected iteration for each arc half-width.
-    arc_half_widths = [
-        0.10,
-        0.10,
-        0.10,
-        0.10,
-        0.10,
-        0.10
-    ]
+    for i in range(100):
 
-    iteration_indices = [
-        4,5,6,7,8,9,
-    ]
+        # One selected iteration for each arc half-width.
+        arc_half_widths = [
+            0.10,
+        ]
 
-    save_directory = (
-        repository_root
-        / "results"
-        / "ellipse"
-        / "arc_length_sweep"
-        / "plots"
-    )
+        iteration_indices = [
+            i
+        ]
 
-    plot_arc_qualitative(
-        repository_root=repository_root,
-        arc_half_widths=arc_half_widths,
-        iteration_indices=iteration_indices,
-        save_directory=save_directory,
-        show=True,
-    )
+        save_directory = (
+            repository_root
+            / "results"
+            / "ellipse"
+            / "arc_length_sweep"
+            / "plots"
+        )
+
+        plot_arc_qualitative(
+            repository_root=repository_root,
+            arc_half_widths=arc_half_widths,
+            iteration_indices=iteration_indices,
+            save_directory=save_directory,
+            show=False,
+            png_name=f"arc_{i}"
+        )

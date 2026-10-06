@@ -85,7 +85,7 @@ if __name__ == "__main__":
     pointcloud_directory = f"../results/isotropic_illustrative/pointclouds"
     result_directory = f"../results/isotropic_illustrative"
 
-    RUN_EXPERIMENT = False
+    RUN_EXPERIMENT = True
 
     if RUN_EXPERIMENT:
         result = run_experiment(

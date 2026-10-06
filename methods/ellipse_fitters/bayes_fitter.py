@@ -4,6 +4,10 @@ from methods.ellipse_fitters.base import BaseEllipseFitter
 from methods.ellipse_fitters.geometric_ls import _algebraic_ellipse_fit
 from methods.ellipse_fitters.ellipse_utils import get_ellipse_params, canonicalize_ellipse_params
 
+from bayes_shape_fitting.visualization.plotting_2d import ShapePlotter2D
+from bayes_shape_fitting.visualization.animation_2d import ShapePlotterAnimations
+import matplotlib.pyplot as plt
+
 from bayes_shape_fitting.inference.samplers.ecm_estimation import ECMOptimizer
 from bayes_shape_fitting.inference.likelihoods import MarginalLikelihood
 from bayes_shape_fitting.inference.noise_functions import NoiseFunction
@@ -68,6 +72,7 @@ class BayesFitter(BaseEllipseFitter):
         cx0, cy0, a0, b0, theta0 = get_ellipse_params(np.array([A, B, C, D, E, F]))
 
         shape_init = canonicalize_ellipse_params(np.array([cx0,cy0,a0,b0,theta0]))
+        shape_init = convert_params_from_standard_to_reparametrized(shape_init)
 
         likelihood = MarginalLikelihood(
             shape=shape,
@@ -88,6 +93,15 @@ class BayesFitter(BaseEllipseFitter):
                          source_init=source_init, noise_init = noise_init,shape_bounds=shape_bounds,
                          source_bounds=source_bounds, noise_bounds = noise_bounds,
                          optimizer=optimizer)
+
+        """plotter = ShapePlotter2D()
+        fig, ax, _ =  plotter.plot_shape(shape, fit_result.shape_params,  label="Fitted Surface", color="green")
+        plotter.plot_shape(shape, shape_init, ax=ax, label="Initial Fit", color="orange")
+        plotter.plot_observations(observations=points, ax=ax)
+
+        animator = ShapePlotterAnimations()
+        ani = animator.animate_optimization_result(fit_result, shape, source_density, ax, interval=1000)
+        plt.show()"""
 
         return convert_params_from_reparametrized_to_standard(fit_result.shape_params)
 

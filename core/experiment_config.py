@@ -4,6 +4,12 @@ import copy
 
 import numpy as np
 
+from core.measurement import (
+    Measurement,
+    MeasurementFunction,
+    generate_synthetic_measurement,
+)
+
 
 T = TypeVar("T", bound="ExperimentConfig")
 Sampler = Callable[[Any], np.ndarray]
@@ -30,6 +36,8 @@ class ExperimentConfig:
     shape_sampler: Sampler | None = None
     source_sampler: Sampler | None = None
     noise_sampler: Sampler | None = None
+
+    measurement_function: MeasurementFunction | None = None
 
     # --- fitters and labels ---
     fitters: list = field(default_factory=list)
@@ -181,6 +189,28 @@ class ExperimentConfig:
         return cls(**filtered)
 
     def get_measurement(
+            self,
+            iteration: int,
+    ) -> Measurement:
+        """
+        Obtain the measurement for one experiment iteration.
+
+        If no custom measurement function is provided, the standard
+        synthetic measurement generator is used.
+        """
+
+        if self.measurement_function is None:
+            return generate_synthetic_measurement(
+                self,
+                iteration,
+            )
+
+        return self.measurement_function(
+            self,
+            iteration,
+        )
+
+    def get_measurement_(
         self,
         n_points: int | None = None,
     ) -> tuple[np.ndarray, np.ndarray]:

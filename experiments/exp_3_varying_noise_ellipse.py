@@ -154,18 +154,19 @@ def make_noise_experiment(
 
     source_bounds_weak = [
         (0.0, 1.0),
-        (
-            ARC_HALF_WIDTH - 0.05,
-            ARC_HALF_WIDTH + 0.05,
-        ),
+
+            #ARC_HALF_WIDTH - 0.05,
+            #ARC_HALF_WIDTH + 0.05,
+        (0.05,0.5)
     ]
 
     source_bounds_strong = [
         (0.0, 1.0),
-        (
-            ARC_HALF_WIDTH - 0.025,
-            ARC_HALF_WIDTH + 0.025,
-        ),
+        #(
+        #    ARC_HALF_WIDTH - 0.025,
+        #    ARC_HALF_WIDTH + 0.025,
+        #),
+        (0.05,0.5)
     ]
 
     # ------------------------------------------------------------------
@@ -373,7 +374,7 @@ if __name__ == "__main__":
     for sigma_sq in noise_variances:
         config = make_noise_experiment(
             sigma_sq=sigma_sq,
-            iterations=10,
+            iterations=100,
         )
 
         result_directory = (

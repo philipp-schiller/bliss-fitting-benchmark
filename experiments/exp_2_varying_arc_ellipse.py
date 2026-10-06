@@ -53,7 +53,7 @@ def sample_source_params(template) -> np.ndarray:
     center, width = template
 
     if center is None:
-        center = np.random.uniform(0.4, 0.6)
+        center = np.random.uniform(0.05, 0.45)
 
     if width is None:
         raise ValueError(
@@ -133,12 +133,12 @@ def make_arc_length_experiment(
     )
 
     source_bounds_weak = [
-        (0.3, 0.7),
+        (0, 0.5),
         (max(0.0, w - 0.05), w + 0.05),
     ]
 
     source_bounds_strong = [
-        (0.4, 0.6),
+        (0, 0.5),
         (max(0.0, w - 0.025), w + 0.025),
     ]
 
@@ -146,7 +146,7 @@ def make_arc_length_experiment(
         (0.001, 0.04),
     ]
 
-    source_init = np.array([0.5, w_prior])
+    source_init = np.array([0.25, w_prior])
     noise_init = np.array([0.0225])
 
     # ---------------------------------------------------------------

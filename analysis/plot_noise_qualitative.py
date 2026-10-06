@@ -24,6 +24,7 @@ def plot_noise_qualitative(
     iteration_indices: list[int],
     save_directory: Path,
     show: bool = False,
+    png_name = None
 ) -> Path:
     """
     Plot individual ellipse fits for selected noise variances.
@@ -275,14 +276,12 @@ def plot_noise_qualitative(
         exist_ok=True,
     )
 
+    if png_name is None:
+        png_name = "noise_qualitative.png"
+
     png_path = (
         save_directory
-        / "noise_qualitative.png"
-    )
-
-    pdf_path = (
-        save_directory
-        / "noise_qualitative.pdf"
+        / png_name
     )
 
     fig.savefig(
@@ -291,10 +290,6 @@ def plot_noise_qualitative(
         bbox_inches="tight",
     )
 
-    fig.savefig(
-        pdf_path,
-        bbox_inches="tight",
-    )
 
     if show:
         plt.show()
@@ -302,7 +297,6 @@ def plot_noise_qualitative(
         plt.close(fig)
 
     print(f"Saved plot: {png_path}")
-    print(f"Saved plot: {pdf_path}")
 
     return png_path
 
@@ -310,35 +304,31 @@ def plot_noise_qualitative(
 if __name__ == "__main__":
     repository_root = Path(__file__).resolve().parents[1]
 
-    # One selected iteration for each fixed noise variance.
-    noise_variances = [
-        0.080,
-        0.080,
-        0.080,
-        0.080,
-        0.080,
-    ]
+    for i in range(100):
+        # One selected iteration for each fixed noise variance.
+        noise_variances = [
+            0.010,
+            0.050,
+            0.090,
+        ]
 
-    iteration_indices = [
-        5,
-        6,
-        7,
-        8,
-        9,
-    ]
+        iteration_indices = [
+            i, i, i
+        ]
 
-    save_directory = (
-        repository_root
-        / "results"
-        / "ellipse"
-        / "noise_sweep"
-        / "plots"
-    )
+        save_directory = (
+            repository_root
+            / "results"
+            / "ellipse"
+            / "noise_sweep"
+            / "plots"
+        )
 
-    plot_noise_qualitative(
-        repository_root=repository_root,
-        noise_variances=noise_variances,
-        iteration_indices=iteration_indices,
-        save_directory=save_directory,
-        show=True,
-    )
+        plot_noise_qualitative(
+            repository_root=repository_root,
+            noise_variances=noise_variances,
+            iteration_indices=iteration_indices,
+            save_directory=save_directory,
+            show=False,
+            png_name=f"noise_{i}"
+        )
