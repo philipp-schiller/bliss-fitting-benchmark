@@ -4,6 +4,7 @@ import numpy as np
 
 from bayes_shape_fitting.inference.noise_functions import IsotropicNoise
 from bayes_shape_fitting.inference.priors import GaussianPrior
+from bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
 from bayes_shape_fitting.inference.source_densitites import UniformSourceDensity
 from bayes_shape_fitting.models.shapes.ellipse import Ellipse
 
@@ -154,18 +155,11 @@ def make_noise_experiment(
 
     source_bounds_weak = [
         (0.0, 1.0),
-
-            #ARC_HALF_WIDTH - 0.05,
-            #ARC_HALF_WIDTH + 0.05,
         (0.05,0.5)
     ]
 
     source_bounds_strong = [
         (0.0, 1.0),
-        #(
-        #    ARC_HALF_WIDTH - 0.025,
-        #    ARC_HALF_WIDTH + 0.025,
-        #),
         (0.05,0.5)
     ]
 
@@ -173,25 +167,13 @@ def make_noise_experiment(
     # Noise priors and bounds
     # ------------------------------------------------------------------
 
-    weak_noise_prior_variance = 2.6e-5
     strong_noise_prior_variance = 6.0e-6
-
-    noise_prior_weak = GaussianPrior(
-        mean=np.array([sigma_sq_prior]),
-        cov=np.array([
-            [weak_noise_prior_variance]
-        ]),
-    )
 
     noise_prior_strong = GaussianPrior(
         mean=np.array([sigma_sq_prior]),
         cov=np.array([
             [strong_noise_prior_variance]
         ]),
-    )
-
-    weak_noise_radius = (
-        1.96 * np.sqrt(weak_noise_prior_variance)
     )
 
     strong_noise_radius = (
@@ -201,10 +183,10 @@ def make_noise_experiment(
     noise_bounds_weak = [
         (
             max(
-                0.0,
-                sigma_sq_prior - weak_noise_radius,
+                0.0001,
+                sigma_sq_prior - 0.1,
             ),
-            sigma_sq_prior + weak_noise_radius,
+            sigma_sq_prior + 0.1,
         )
     ]
 
@@ -224,7 +206,7 @@ def make_noise_experiment(
     ])
 
     noise_init = np.array([
-        sigma_sq_prior,
+        0.08,
     ])
 
     # ------------------------------------------------------------------
@@ -244,7 +226,6 @@ def make_noise_experiment(
         noise_function=IsotropicNoise(
             dim_param=shape.parameter_dim,
             dim_ambient=shape.ambient_dim,
-            prior=noise_prior_weak,
         ),
 
         source_init=source_init.copy(),
@@ -299,6 +280,7 @@ def make_noise_experiment(
             dim_param=shape.parameter_dim,
             dim_ambient=shape.ambient_dim,
         ),
+        optimizer=MAPOptimizer()
     )
 
     # The runner updates BLISS_exact.fixed_params after each resampling.
@@ -363,10 +345,6 @@ if __name__ == "__main__":
         0.030,
         0.040,
         0.050,
-        0.060,
-        0.070,
-        0.080,
-        0.090,
     ]
 
     result_directories = []
@@ -374,7 +352,7 @@ if __name__ == "__main__":
     for sigma_sq in noise_variances:
         config = make_noise_experiment(
             sigma_sq=sigma_sq,
-            iterations=100,
+            iterations=1,
         )
 
         result_directory = (

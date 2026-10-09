@@ -40,7 +40,7 @@ LINESTYLES = [
 
 def trimmed_nanmean(
     values: np.ndarray,
-    proportion_to_cut: float = 0,
+    proportion_to_cut: float = 0.1,
 ) -> float:
     """
     Compute a trimmed mean after removing NaN and infinite values.
@@ -164,15 +164,15 @@ def plot_ellipse_sweep(
     panels = [
         (
             sweep_data["area_errors"],
-            r"Area deviation $E_{\mathrm{area}}$",
+            r"Avg. area deviation $E_{\mathrm{area}}$",
         ),
         (
             sweep_data["center_errors"],
-            r"Centre deviation $E_c$",
+            r"Avg. centre deviation $E_c$",
         ),
         (
             sweep_data["shape_errors"],
-            r"Shape deviation $E_{\mathrm{shape}}$",
+            r"Avg. Shape deviation $E_{\mathrm{shape}}$",
         ),
         (
             sweep_data["fitting_times"],
@@ -185,12 +185,23 @@ def plot_ellipse_sweep(
     ):
         ax = axes[panel_index]
 
+
+        # ----------------------------
+        # Plot all methods
+        # ----------------------------
         for method, values in values_by_method.items():
+
             style = method_styles[method]
+
+            plot_values = np.asarray(values, dtype=float).copy()
+
+            plot_values[plot_values > 1e3] = np.nan
+
             ax.plot(
                 sweep_values,
-                values,
+                plot_values,
                 marker=style["marker"],
+                #linestyle=style["linestyle"],
                 linewidth=2,
                 label=method,
             )

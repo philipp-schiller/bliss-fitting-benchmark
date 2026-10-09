@@ -16,6 +16,7 @@ from bayes_shape_fitting.models.shapes.ellipsoid import (
     Ellipsoid_R,
 )
 
+from analysis.plot_ellipsoid_sweep import plot_ellipsoid_sweep, collect_ellipsoid_sweep
 from core.experiment_config import ExperimentConfig
 from core.measurement import Measurement
 from core.run_experiment import run_experiment
@@ -27,9 +28,9 @@ from methods.ellipsoid_fitters.bayes_fitter import (
 from methods.ellipsoid_fitters.calafiore import (
     CalafioreEllipsoidFitter,
 )
+from methods.ellipsoid_fitters.zhao_bayes import BayesianZhaoFitter
 
 
-RUN_EXPERIMENT = True
 
 
 # ---------------------------------------------------------------------------
@@ -599,9 +600,9 @@ def make_ellipsoid_coverage_experiment(
 
     angle_eps = 1e-6
     shape_bounds = [
-        (-5, 5),  # x_c
-        (-5, 5),  # y_c
-        (-5, 5),  # z_c
+        (-2, 2),  # x_c
+        (-2, 2),  # y_c
+        (-2, 2),  # z_c
         (0.1, 5),  # a
         (0.3, 1.0),  # r1
         (0.3, 1.0),  # r2
@@ -667,11 +668,13 @@ def make_ellipsoid_coverage_experiment(
 
         fitters=[
             CalafioreEllipsoidFitter(),
+            BayesianZhaoFitter(),
             bliss,
         ],
 
         labels=[
             "Calafiore",
+            "Zhao",
             r"$\mathbf{BLISS}$",
         ],
     )
@@ -684,8 +687,14 @@ def make_ellipsoid_coverage_experiment(
 if __name__ == "__main__":
     repository_root = Path(__file__).resolve().parents[1]
 
+    RUN_EXPERIMENT = True
+
     coverages = [
         0.2,
+        0.3,
+        0.4,
+        0.5,
+        #1
     ]
 
     result_directories = []
@@ -693,7 +702,7 @@ if __name__ == "__main__":
     for coverage in coverages:
         config = make_ellipsoid_coverage_experiment(
             coverage=coverage,
-            iterations=10,
+            iterations=6,
             coverage_pole="south",
         )
 
@@ -740,3 +749,26 @@ if __name__ == "__main__":
 
             # Validate that the result exists and can be loaded.
             SweepResult.load(result_directory)
+
+    sweep_data = collect_ellipsoid_sweep(
+        sweep_values=coverages,
+        result_directories=result_directories,
+    )
+
+    plot_directory = (
+            repository_root
+            / "results"
+            / "ellipsoid"
+            / "plots"
+    )
+
+    plot_ellipsoid_sweep(
+        sweep_data=sweep_data,
+        x_label=r"Coverage ",
+        save_path=(
+            plot_directory
+            / "ellipsoid.png"
+        ),
+        invert_x_axis=False,
+        log_error_axes=False,
+        show=True,)

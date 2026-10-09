@@ -53,7 +53,7 @@ def sample_source_params(template) -> np.ndarray:
     center, width = template
 
     if center is None:
-        center = np.random.uniform(0.05, 0.45)
+        center = np.random.uniform(0.25, 0.5)
 
     if width is None:
         raise ValueError(
@@ -113,32 +113,22 @@ def make_arc_length_experiment(
     # ---------------------------------------------------------------
 
     source_prior_weak = GaussianPrior(
-        mean=np.array([0.5, w_prior]),
-        cov=np.diag([1000.0, 0.00065]),
+        mean=np.array([0.1, w_prior]),
+        cov=np.diag([1, 0.00065]),
     )
 
     source_prior_strong = GaussianPrior(
-        mean=np.array([0.5, w_prior]),
-        cov=np.diag([1000.0, 0.00016]),
-    )
-
-    noise_prior_weak = GaussianPrior(
-        mean=np.array([0.0225]),
-        cov=np.array([[0.00001]]),
-    )
-
-    noise_prior_strong = GaussianPrior(
-        mean=np.array([0.0225]),
-        cov=np.array([[0.000001]]),
+        mean=np.array([0.1, w_prior]),
+        cov=np.diag([1, 0.00016]),
     )
 
     source_bounds_weak = [
-        (0, 0.5),
+        (0, 1),
         (max(0.0, w - 0.05), w + 0.05),
     ]
 
     source_bounds_strong = [
-        (0, 0.5),
+        (0, 1),
         (max(0.0, w - 0.025), w + 0.025),
     ]
 
@@ -146,7 +136,7 @@ def make_arc_length_experiment(
         (0.001, 0.04),
     ]
 
-    source_init = np.array([0.25, w_prior])
+    source_init = np.array([0.375, w_prior])
     noise_init = np.array([0.0225])
 
     # ---------------------------------------------------------------
@@ -165,7 +155,6 @@ def make_arc_length_experiment(
         noise_function=IsotropicNoise(
             dim_param=shape.parameter_dim,
             dim_ambient=shape.ambient_dim,
-            prior=noise_prior_weak,
         ),
         source_init=source_init.copy(),
         noise_init=noise_init.copy(),
@@ -189,7 +178,6 @@ def make_arc_length_experiment(
         noise_function=IsotropicNoise(
             dim_param=shape.parameter_dim,
             dim_ambient=shape.ambient_dim,
-            prior=noise_prior_strong,
         ),
         source_init=source_init.copy(),
         noise_init=noise_init.copy(),
@@ -264,18 +252,21 @@ def make_arc_length_experiment(
     )
 
 
-RUN_EXPERIMENT = True
+RUN_EXPERIMENT = False
 
 
 if __name__ == "__main__":
+
+    np.random.seed(42)
+
     repository_root = Path(__file__).resolve().parents[1]
 
     arc_half_widths = [
         0.10,
         0.15,
-        0.20,
-        0.25,
-        0.30,
+        #0.20,
+        #0.25,
+        #0.30,
     ]
 
     result_directories = []

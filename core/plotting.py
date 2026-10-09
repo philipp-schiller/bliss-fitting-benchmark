@@ -74,20 +74,15 @@ def plot_sweep_result(
     n_fitters = len(labels)
 
     # One panel for each fitter and one panel for the point-cloud example.
-    n_panels = n_fitters + 1
-    n_rows = 2
+    n_panels = n_fitters
+    n_rows = 1
     n_cols = math.ceil(n_panels / n_rows)
 
     plotter = ShapePlotter2D()
 
-    fig, axes = plt.subplots(
-        n_rows,
-        n_cols,
-        figsize=(19.2, 10.8),
-        sharex=True,
-        sharey=True,
-        squeeze=False,
-    )
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(4 * n_cols, 4), sharex=True, sharey=True)
+    fig.set_size_inches(19.2, 5.8)
+    fig.tight_layout(pad=0.3, w_pad=0.1, h_pad=0.1)
 
     axes = axes.ravel()
 
@@ -185,7 +180,7 @@ def plot_sweep_result(
     # Point-cloud panel
     # ------------------------------------------------------------------
 
-    example_ax = axes[n_fitters]
+    """example_ax = axes[n_fitters]
 
     example_ax.set_aspect("equal", adjustable="box")
     example_ax.set_title(
@@ -213,7 +208,7 @@ def plot_sweep_result(
         linestyle="none",
         color="black",
         label="True Center",
-    )
+    )"""
 
     pointcloud_path = (
         Path(pointcloud_dir)
@@ -230,13 +225,13 @@ def plot_sweep_result(
     observations = pointcloud_data["points"]
     parameter_samples = pointcloud_data["parameter_samples"]
 
-    example_ax.scatter(
+    """example_ax.scatter(
         observations[:, 0],
         observations[:, 1],
         s=8,
         alpha=0.8,
         label="Sampled Points",
-    )
+    )"""
 
     # ------------------------------------------------------------------
     # Covariance ellipses for this exact iteration
@@ -290,7 +285,7 @@ def plot_sweep_result(
             ),
         )
 
-        example_ax.add_patch(covariance_ellipse)
+        #example_ax.add_patch(covariance_ellipse)
 
     # Hide unused subplot positions.
     for unused_ax in axes[n_panels:]:
@@ -313,6 +308,20 @@ def plot_sweep_result(
         unique_entries.values(),
         unique_entries.keys(),
         loc="lower center",
+        bbox_to_anchor=(0.5, -0.02),  # vertical position below figure
+        ncol=n_cols,  # <-- one row!
+        fontsize=20,
+        handletextpad=0.8
+    )
+
+    # Add bottom margin so the legend is not cut off
+    fig.subplots_adjust(bottom=0.18, top=0.88, hspace=0.35, wspace=0.3)
+    plt.tight_layout(rect=[0, 0.08, 1, 0.93])
+
+    """fig.legend(
+        unique_entries.values(),
+        unique_entries.keys(),
+        loc="lower center",
         bbox_to_anchor=(0.5, -0.02),
         ncol=len(unique_entries),
         fontsize=20,
@@ -324,7 +333,7 @@ def plot_sweep_result(
         top=0.88,
         hspace=0.35,
         wspace=0.3,
-    )
+    )"""
 
     # ------------------------------------------------------------------
     # Save

@@ -282,11 +282,11 @@ def plot_arc_qualitative(
 if __name__ == "__main__":
     repository_root = Path(__file__).resolve().parents[1]
 
-    for i in range(100):
+    for i in range(10):
 
         # One selected iteration for each arc half-width.
         arc_half_widths = [
-            0.10,
+            0.20,
         ]
 
         iteration_indices = [

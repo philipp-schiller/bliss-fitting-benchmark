@@ -1224,16 +1224,17 @@ if __name__ == "__main__":
         Path(__file__).resolve().parents[1]
     )
 
-    for i in range(100):
+    for i in range(6):
 
         plot_ellipsoid_qualitative_grid(
             repository_root=repository_root,
             trial=i,
             coverages=[
-                0.2
+                0.2,0.3,0.4,0.5
             ],
             methods=[
                 "Calafiore",
+                "Zhao",
                 r"$\mathbf{BLISS}$",
             ],
             output_path=(

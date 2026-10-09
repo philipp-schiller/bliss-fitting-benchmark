@@ -261,7 +261,7 @@ class BayesianEllipseFitterZhao(BaseEllipseFitter):
     MATLAB/C++ implementation (https://github.com/zikai1/BayFit).
     """
 
-    def __init__(self, m_init: int = 100, rdos_threshold: float = 0.001,
+    def __init__(self, m_init: int = 100, rdos_threshold: float = np.inf,
                  tol: float = 1e-8, max_it: int = 200):
         """
         :param m_init: number of points used to seed the unit-circle model.

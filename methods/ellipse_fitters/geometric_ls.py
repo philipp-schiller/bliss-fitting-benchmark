@@ -53,6 +53,7 @@ import numpy as np
 from scipy.optimize import least_squares
 
 from methods.ellipse_fitters.base import BaseEllipseFitter
+from methods.ellipse_fitters.self_normalized import SelfNormalizedFitter
 
 
 # --------------------------------------------------------------------------
@@ -212,8 +213,10 @@ class GeometricEllipseFitter(BaseEllipseFitter):
         if points.ndim != 2 or points.shape[1] != 2:
             raise ValueError("points must be an (N, 2) array")
 
-        A, B, C, D, E, F = _algebraic_ellipse_fit(points)
-        cx0, cy0, a0, b0, theta0 = _conic_to_params(A, B, C, D, E, F)
+        try: cx0, cy0, a0, b0, theta0 = SelfNormalizedFitter().fit(points)
+        except Exception:
+            A, B, C, D, E, F = _algebraic_ellipse_fit(points)
+            cx0, cy0, a0, b0, theta0 = _conic_to_params(A, B, C, D, E, F)
 
         x0 = np.array([cx0, cy0, a0, b0, theta0])
         res = least_squares(

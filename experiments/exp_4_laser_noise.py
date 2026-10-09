@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 
 from bayes_shape_fitting.inference.noise_functions import (
-    LaserDependentNoise,
+    LaserDependentEllipseNoise,
     PartiallyFixedNoise,
 )
 from bayes_shape_fitting.inference.priors import GaussianPrior
@@ -33,7 +33,7 @@ from methods.ellipse_fitters.zhao_bayes import (
     BayesianEllipseFitterZhao,
 )
 
-RUN_EXPERIMENT = True
+RUN_EXPERIMENT = False
 
 # ---------------------------------------------------------------------------
 # Fixed experiment settings
@@ -82,21 +82,17 @@ def make_laser_noise(
     supplied through noise_params or fixed explicitly.
     """
 
-    base_noise = LaserDependentNoise(
+    base_noise = LaserDependentEllipseNoise(
         dim_param=1,
         dim_ambient=2,
         shape=shape,
         scanner=SCANNER_POSITION.copy(),
+        fixed_shape_params = SHAPE_PARAMS,
         prior = prior
     )
 
     fixed_params = {
-        0: SHAPE_PARAMS[0],
-        1: SHAPE_PARAMS[1],
-        2: SHAPE_PARAMS[2],
-        3: SHAPE_PARAMS[3],
-        4: SHAPE_PARAMS[4],
-        6: SIGMA_1,
+        1: SIGMA_1,
     }
 
     if sigma_0_fixed is not None:
@@ -215,7 +211,7 @@ def make_laser_experiment(
     source_init = SOURCE_PARAMS.copy()
 
     noise_init = np.array([
-        sigma_0_prior,
+            sigma_0_prior,
     ])
 
     # ------------------------------------------------------------------
@@ -230,9 +226,22 @@ def make_laser_experiment(
         prior=source_prior,
     )
 
-    bliss_noise_function = make_laser_noise(
-        prior=noise_prior,
+    base_noise = LaserDependentEllipseNoise(
+        dim_param=1,
+        dim_ambient=2,
+        shape=shape,
+        scanner=SCANNER_POSITION.copy(),
     )
+
+    fixed_params = {
+        1: SIGMA_1,
+    }
+
+    bliss_noise_function = PartiallyFixedNoise(base_noise,fixed_params=fixed_params)
+
+    #bliss_noise_function = make_laser_noise(
+    #    prior=noise_prior,
+    #)
 
     bliss = BayesFitter(
         name="BLISS",
@@ -372,9 +381,9 @@ if __name__ == "__main__":
         x_label=r"Laser-noise parameter $\sigma_0$",
         save_path=(
             plot_directory
-            / "laser_noise_sweep.png"
+            / "laser_noise_sweep_old.png"
         ),
         invert_x_axis=False,
-        log_error_axes=True,
+        log_error_axes=False,
         show=True,
     )

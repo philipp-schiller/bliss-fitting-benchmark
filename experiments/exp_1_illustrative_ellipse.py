@@ -21,13 +21,13 @@ from metrics.ellipse_metrics import compute_ellipse_metrics
 shape = Ellipse()
 
 # we define BLISS fitters here:
-noise_prior =  GaussianPrior(mean=np.array([0.0225]), cov=np.array([0.000001]))
-noise_bounds = [(0.001, 0.04)]
+noise_prior =  GaussianPrior(mean=np.array([0.0225]), cov=np.array([0.0001]))
+noise_bounds = [(0.001, 0.05)]
 source_prior = GaussianPrior(mean=np.array([0.3, 0.20]), cov=np.diag([10, 0.00065]))
-source_bounds = [(0, 1), (0.15, 0.25)]
+source_bounds = [(0, 1), (0.175, 0.225)]
 
 # now we define init_values for source_density and noise function
-source_init = np.array([0.3, 0.20]) + 0.01 * np.random.randn(2)
+source_init = np.array([0.3, 0.20])
 noise_init = np.array(0.0225)
 
 BLISS = BayesFitter(
@@ -58,7 +58,7 @@ IsotropicIllustrative = ExperimentConfig(
         # define the ground-truth-params
         shape_params = np.array([-1, 0, 3, 2, np.pi / 4]),
         source_params = np.array([0.3, 0.20]),
-        noise_params = 0.15**2,
+        noise_params = 0.0225,
 
 
         # specify the baseline fitters
@@ -82,10 +82,12 @@ IsotropicIllustrative = ExperimentConfig(
 
 if __name__ == "__main__":
 
+    np.random.seed(100)
+
     pointcloud_directory = f"../results/isotropic_illustrative/pointclouds"
     result_directory = f"../results/isotropic_illustrative"
 
-    RUN_EXPERIMENT = True
+    RUN_EXPERIMENT = False
 
     if RUN_EXPERIMENT:
         result = run_experiment(
@@ -100,11 +102,9 @@ if __name__ == "__main__":
     plot_sweep_result(
         result,
         IsotropicIllustrative,
-        iteration=0,
+        iteration=10,
         pointcloud_dir=pointcloud_directory,
         save_dir=result_directory + "/plots",
     )
 
     metrics = compute_ellipse_metrics(result)
-
-    print(metrics)

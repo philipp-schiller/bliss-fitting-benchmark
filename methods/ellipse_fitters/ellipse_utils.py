@@ -270,38 +270,36 @@ def is_visible(t_vals: float | np.ndarray, params: np.array, laser: np.ndarray) 
 
     return result
 
-import numpy as np
-
-
 def canonicalize_ellipse_params(
     params: np.ndarray,
-) -> np.ndarray:
+):
     """
     Convert ellipse parameters to a canonical representation.
 
-    The input parameterization is:
-
+    Input:
         [cx, cy, a, b, phi]
 
-    The returned representation satisfies:
+    Output:
+        [cx, cy, a, b, phi]
+
+    satisfying
 
         a >= b
         phi in [-pi/2, pi/2)
 
-    Swapping a and b requires adding pi/2 to phi because these
-    parameter combinations describe the same ellipse.
-
-    Parameters
-    ----------
-    params:
-        Ellipse parameter array with shape (5,).
-
     Returns
     -------
-    np.ndarray:
-        Canonical ellipse parameters with shape (5,).
-    """
+    params_canonical : np.ndarray
+        Canonicalized ellipse parameters.
 
+    t_shift : float
+        Parameter-domain shift that must be applied to any
+        source-density / arc-center parameter c via
+
+            c = (c + t_shift) % 1.0
+
+        in order to preserve the same geometric locations.
+    """
     params = np.asarray(params, dtype=float)
 
     if params.shape != (5,):
@@ -310,10 +308,10 @@ def canonicalize_ellipse_params(
             f"but received {params.shape}."
         )
 
-    cx, cy, a, b, phi = params
-
     if not np.all(np.isfinite(params)):
-        return np.full(5, np.nan)
+        return np.full(5, np.nan), np.nan
+
+    cx, cy, a, b, phi = params
 
     if a <= 0 or b <= 0:
         raise ValueError(
@@ -321,11 +319,36 @@ def canonicalize_ellipse_params(
             f"but received a={a} and b={b}."
         )
 
-    if b > a:
+    t_shift = 0.0
+
+    #
+    # Enforce a >= b
+    #
+    if b > a + 1e-12:
         a, b = b, a
         phi += np.pi / 2
 
-    # Ellipse orientation is pi-periodic.
-    phi = (phi + np.pi / 2) % np.pi - np.pi / 2
+        # theta -> theta + pi/2 corresponds to
+        # t -> t + 1/4
+        t_shift += 0.25
 
-    return np.array([cx, cy, a, b, phi])
+    #
+    # Bring angle into [-pi/2, pi/2)
+    #
+    while phi >= np.pi / 2:
+        phi -= np.pi
+
+        # theta -> theta - pi corresponds to
+        # t -> t + 1/2
+        t_shift += 0.5
+
+    while phi < -np.pi / 2:
+        phi += np.pi
+
+        # theta -> theta + pi corresponds to
+        # t -> t + 1/2
+        t_shift += 0.5
+
+    t_shift %= 1.0
+
+    return np.array([cx, cy, a, b, phi]), t_shift
