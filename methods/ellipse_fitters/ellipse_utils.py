@@ -1,7 +1,7 @@
 """
 This file contains useful utils around ellipses.
 
-We parametrize an ellipse via params = (a,b,x_c,y_c,theta), where a and b are the axis lengths, (x_c,y_c) is the
+We parametrize an ellipse via params = (x_c,y_c,a,b,theta), where a and b are the axis lengths, (x_c,y_c) is the
 center point and theta the rotation angle
 
 
@@ -352,3 +352,61 @@ def canonicalize_ellipse_params(
     t_shift %= 1.0
 
     return np.array([cx, cy, a, b, phi]), t_shift
+
+def orient_south_pole_towards_scanner(
+    theta: np.ndarray,
+    scanner_position: np.ndarray,
+) -> np.ndarray:
+    """
+    Choose an equivalent ellipse orientation such that the south pole
+    is closer to the scanner than the north pole.
+
+    Parameters
+    ----------
+    theta:
+        [x_c, y_c, a, r, alpha]
+
+    scanner_position:
+        Scanner coordinates [x, y].
+
+    Returns
+    -------
+    np.ndarray
+        Ellipse parameters with a consistently oriented major axis.
+    """
+    theta = np.asarray(theta, dtype=float).copy()
+    scanner_position = np.asarray(scanner_position, dtype=float)
+
+    if theta.shape != (5,):
+        raise ValueError(
+            f"theta must have shape (5,), got {theta.shape}"
+        )
+
+    if scanner_position.shape != (2,):
+        raise ValueError(
+            "scanner_position must have shape (2,), "
+            f"got {scanner_position.shape}"
+        )
+
+    center = theta[:2]
+    alpha = theta[4]
+
+    major_axis = np.array([
+        np.cos(alpha),
+        np.sin(alpha),
+    ])
+
+    scanner_direction = scanner_position - center
+
+    # South pole lies along -major_axis.
+    # If major_axis points towards the scanner,
+    # north is currently closer, so flip.
+    if np.dot(major_axis, scanner_direction) > 0:
+        alpha += np.pi
+
+        # keep angle in a canonical interval
+        alpha = (alpha + np.pi / 2) % np.pi - np.pi / 2
+
+        theta[4] = alpha
+
+    return theta

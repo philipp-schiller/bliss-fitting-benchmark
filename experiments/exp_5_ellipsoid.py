@@ -687,14 +687,13 @@ def make_ellipsoid_coverage_experiment(
 if __name__ == "__main__":
     repository_root = Path(__file__).resolve().parents[1]
 
-    RUN_EXPERIMENT = True
+    RUN_EXPERIMENT = False
 
     coverages = [
         0.2,
         0.3,
         0.4,
         0.5,
-        #1
     ]
 
     result_directories = []
@@ -702,7 +701,7 @@ if __name__ == "__main__":
     for coverage in coverages:
         config = make_ellipsoid_coverage_experiment(
             coverage=coverage,
-            iterations=6,
+            iterations=50,
             coverage_pole="south",
         )
 
@@ -764,11 +763,11 @@ if __name__ == "__main__":
 
     plot_ellipsoid_sweep(
         sweep_data=sweep_data,
-        x_label=r"Coverage ",
+        x_label=r"Observed Coverage (%) ",
         save_path=(
             plot_directory
             / "ellipsoid.png"
         ),
-        invert_x_axis=False,
-        log_error_axes=False,
+        invert_x_axis=True,
+        log_error_axes=True,
         show=True,)

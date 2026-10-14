@@ -41,7 +41,7 @@ LINESTYLES = [
 
 def trimmed_nanmean(
     values: np.ndarray,
-    proportion_to_cut: float = 0.0,
+    proportion_to_cut: float = 0.1,
 ) -> float:
     """
     Compute a trimmed mean after removing NaN and infinite values.
@@ -79,6 +79,7 @@ def collect_ellipsoid_sweep(
         )
 
     sweep_values = np.asarray(sweep_values, dtype=float)
+    sweep_values = np.asarray(sweep_values*100, dtype=int)
 
     center_errors: dict[str, list[float]] = {}
     volume_errors: dict[str, list[float]] = {}
@@ -169,7 +170,7 @@ def plot_ellipsoid_sweep(
         ),
         (
             sweep_data["center_errors"],
-            r"Avg. centre deviation $E_c$",
+            r"Avg. center deviation $E_c$",
         ),
         (
             sweep_data["shape_errors"],
@@ -197,7 +198,7 @@ def plot_ellipsoid_sweep(
                 dtype=float,
             ).copy()
 
-            plot_values[plot_values > 1e3] = np.nan
+            plot_values[plot_values > 1e4] = np.nan
 
             ax.plot(
                 sweep_values,
@@ -223,7 +224,7 @@ def plot_ellipsoid_sweep(
             alpha=0.3,
         )
 
-        if log_error_axes and panel_index < 3:
+        if log_error_axes and panel_index < 4:
             ax.set_yscale("log")
 
         if invert_x_axis:

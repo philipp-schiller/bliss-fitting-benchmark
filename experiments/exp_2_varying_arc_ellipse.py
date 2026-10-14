@@ -24,6 +24,8 @@ from analysis.plot_ellipse_sweep import (
     plot_ellipse_sweep,
 )
 
+from analysis.plot_ellipse_sweep_boxplot import plot_ellipse_boxplot_summary, plot_ellipse_bias_sweep
+
 shape = Ellipse()
 
 def sample_ellipse_shape(template) -> np.ndarray:
@@ -87,7 +89,8 @@ def make_arc_length_experiment(
     if w_prior is None:
         w_prior = w
 
-    experiment_name = f"arc_length_w_{w:.2f}"
+    #experiment_name = f"arc_length_w_{w:.2f}"
+    experiment_name = f"arc_length_bounds_w_{w:.2f}"
 
     if not np.isclose(w_prior, w):
         experiment_name += f"_prior_{w_prior:.2f}"
@@ -124,12 +127,13 @@ def make_arc_length_experiment(
 
     source_bounds_weak = [
         (0, 1),
-        (max(0.0, w - 0.05), w + 0.05),
+        (0.1, 0.5)
     ]
 
     source_bounds_strong = [
         (0, 1),
-        (max(0.0, w - 0.025), w + 0.025),
+        (0.1,0.5)
+        # (max(0.0, w - 0.05), w + 0.05),
     ]
 
     noise_bounds = [
@@ -138,6 +142,14 @@ def make_arc_length_experiment(
 
     source_init = np.array([0.375, w_prior])
     noise_init = np.array([0.0225])
+
+    shape_bounds = [
+        (-10, 10),  # x_c
+        (-10, 10),  # y_c
+        (0.3, np.inf),  # a
+        (0.3, np.inf),  # b
+        (-np.inf, np.inf),  # theta
+    ]
 
     # ---------------------------------------------------------------
     # BLISS with weak priors
@@ -160,6 +172,7 @@ def make_arc_length_experiment(
         noise_init=noise_init.copy(),
         source_bounds=source_bounds_weak,
         noise_bounds=noise_bounds,
+        shape_bounds=shape_bounds
     )
 
     # ---------------------------------------------------------------
@@ -183,6 +196,7 @@ def make_arc_length_experiment(
         noise_init=noise_init.copy(),
         source_bounds=source_bounds_strong,
         noise_bounds=noise_bounds,
+        shape_bounds=shape_bounds
     )
 
     # ---------------------------------------------------------------
@@ -207,6 +221,7 @@ def make_arc_length_experiment(
         name="BLISS_exact",
         source_density=exact_source,
         noise_function=exact_noise,
+        shape_bounds=shape_bounds
     )
 
     return ExperimentConfig(
@@ -252,7 +267,7 @@ def make_arc_length_experiment(
     )
 
 
-RUN_EXPERIMENT = False
+RUN_EXPERIMENT = True
 
 
 if __name__ == "__main__":
@@ -264,9 +279,9 @@ if __name__ == "__main__":
     arc_half_widths = [
         0.10,
         0.15,
-        #0.20,
-        #0.25,
-        #0.30,
+        0.20,
+        0.25,
+        0.30,
     ]
 
     result_directories = []
@@ -339,5 +354,22 @@ if __name__ == "__main__":
         save_path=plot_directory / "arc_coverage_sweep.png",
         invert_x_axis=True,
         log_error_axes=True,
+        show=True,
+    )
+
+    plot_ellipse_boxplot_summary(
+        sweep_data,
+        coverage_indices=[4, 2, 0],  # 60%,40%,20%
+        x_label_template="Arc coverage {value:.0f}%",
+        value_transform=lambda w: w,
+        save_path= plot_directory / "coverage_boxplots.png",
+        show=True
+    )
+
+    plot_ellipse_bias_sweep(
+        sweep_data,
+        x_label="Arc coverage (%)",
+        invert_x_axis=True,
+        save_path="coverage_bias_sweep.png",
         show=True,
     )

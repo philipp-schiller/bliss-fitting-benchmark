@@ -33,10 +33,10 @@ PUB_RC = {
 }
 
 PALETTE = [
-    "#0072B2",
     "#D55E00",
-    "#009E73",
-    "#CC79A7",
+    "#D55E00",
+    "#D55E00",
+    "#D55E00",
     "#E69F00",
     "#56B4E9",
     "#999999",
@@ -1224,13 +1224,14 @@ if __name__ == "__main__":
         Path(__file__).resolve().parents[1]
     )
 
-    for i in range(6):
+    #for i in range(50):
+    for i in [26]:
 
         plot_ellipsoid_qualitative_grid(
             repository_root=repository_root,
             trial=i,
             coverages=[
-                0.2,0.3,0.4,0.5
+                0.5,0.4,0.3,0.2
             ],
             methods=[
                 "Calafiore",

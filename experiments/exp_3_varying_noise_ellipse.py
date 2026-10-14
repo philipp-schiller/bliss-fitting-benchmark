@@ -21,14 +21,12 @@ from analysis.plot_ellipse_sweep import (
     collect_ellipse_sweep,
     plot_ellipse_sweep,
 )
-
-
-RUN_EXPERIMENT = True
+from analysis.plot_ellipse_sweep_boxplot import plot_ellipse_boxplot_summary, plot_ellipse_bias_sweep
 
 shape = Ellipse()
 
-# Arc half-width 0.2 corresponds to 40% coverage in your convention.
-ARC_HALF_WIDTH = 0.2
+# Arc half-width 0.3 corresponds to 60% coverage in your convention.
+ARC_HALF_WIDTH = 0.3
 
 
 # ---------------------------------------------------------------------------
@@ -68,7 +66,7 @@ def sample_source_params(template) -> np.ndarray:
     center, width = template
 
     if center is None:
-        center = np.random.uniform(0.4, 0.6)
+        center = np.random.uniform(0.25, 0.5)
 
     if width is None:
         raise ValueError(
@@ -155,12 +153,13 @@ def make_noise_experiment(
 
     source_bounds_weak = [
         (0.0, 1.0),
-        (0.05,0.5)
+        (0.1, 0.5)
     ]
 
     source_bounds_strong = [
         (0.0, 1.0),
-        (0.05,0.5)
+        (0.1, 0.5)
+        #(ARC_HALF_WIDTH - 0.05, ARC_HALF_WIDTH + 0.05)
     ]
 
     # ------------------------------------------------------------------
@@ -201,12 +200,12 @@ def make_noise_experiment(
     ]
 
     source_init = np.array([
-        0.5,
+        0.375,
         ARC_HALF_WIDTH,
     ])
 
     noise_init = np.array([
-        0.08,
+        0.05,
     ])
 
     # ------------------------------------------------------------------
@@ -335,6 +334,8 @@ def make_noise_experiment(
 # Run or load the complete noise sweep
 # ---------------------------------------------------------------------------
 
+RUN_EXPERIMENT = True
+
 if __name__ == "__main__":
     repository_root = Path(__file__).resolve().parents[1]
 
@@ -345,6 +346,11 @@ if __name__ == "__main__":
         0.030,
         0.040,
         0.050,
+        0.060,
+        0.070,
+        0.080,
+        0.090,
+        0.100
     ]
 
     result_directories = []
@@ -352,7 +358,7 @@ if __name__ == "__main__":
     for sigma_sq in noise_variances:
         config = make_noise_experiment(
             sigma_sq=sigma_sq,
-            iterations=1,
+            iterations=100,
         )
 
         result_directory = (
@@ -427,5 +433,23 @@ if __name__ == "__main__":
         ),
         invert_x_axis=False,
         log_error_axes=True,
+        show=True,
+    )
+
+    plot_ellipse_boxplot_summary(
+        sweep_data,
+        coverage_indices=[0, 4, 9],
+        x_label_template=r"Noise variance $\sigma^2 = {value:g}$",
+        save_path="noise_boxplots.png",
+        show=True
+    )
+
+    plot_ellipse_bias_sweep(
+        sweep_data,
+        x_label=r"Noise variance $\sigma^2$",
+        save_path=(
+                plot_directory
+                / "noise_variance_bias_sweep_bounds.png"
+        ),
         show=True,
     )

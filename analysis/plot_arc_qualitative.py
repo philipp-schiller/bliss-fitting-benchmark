@@ -41,9 +41,12 @@ def plot_arc_qualitative(
     fig, axes = plt.subplots(
         1,
         n_panels,
-        figsize=(3.3 * n_panels, 3.3),
+        figsize=(8.2, 3.4),
+
+        #figsize=(3.3 * n_panels, 3.3),
         squeeze=False,
     )
+    fig.subplots_adjust(wspace=0.05)
 
     axes = axes.ravel()
 
@@ -108,8 +111,8 @@ def plot_arc_qualitative(
         ax.set_ylabel("")
 
         # Plot limits based on the ground-truth ellipse.
-        margin_factor_x = 1.7
-        margin_factor_y = 1.9
+        margin_factor_x = 1.3
+        margin_factor_y = 1.15
 
         x_radius = max(
             abs(shape_gt[2]),
@@ -131,9 +134,7 @@ def plot_arc_qualitative(
         # Ground truth
         # --------------------------------------------------------------
 
-        canonical_ground_truth = canonicalize_ellipse_params(
-            shape_gt
-        )
+        canonical_ground_truth = shape_gt
 
         plotter.plot_shape(
             shape,
@@ -201,22 +202,24 @@ def plot_arc_qualitative(
             observations[:, 0],
             observations[:, 1],
             s=10,
-            alpha=0.35,
-            color="gray",
-            label="Observations",
+            alpha=0.55,
+            color="black",
+            #label="Observations",
             zorder=1,
         )
 
         coverage = int(round(200 * w))
 
         ax.set_xlabel(
-            f"Arc coverage: {coverage}%",
-            fontsize=10,
+            f"{coverage}% coverage",
+            fontsize=14,
         )
 
     # ------------------------------------------------------------------
     # Shared legend
     # ------------------------------------------------------------------
+
+    reorder = lambda hl, nc: (sum((lis[i::nc] for i in range(nc)), []) for lis in hl)
 
     legend_entries = {}
 
@@ -232,18 +235,26 @@ def plot_arc_qualitative(
             if label and label not in legend_entries:
                 legend_entries[label] = handle
 
+    handles, labels = reorder(
+        (
+            list(legend_entries.values()),
+            list(legend_entries.keys()),
+        ),
+        4,
+    )
+
     fig.legend(
-        legend_entries.values(),
-        legend_entries.keys(),
+        handles,
+        labels,
         loc="lower center",
         bbox_to_anchor=(0.5, -0.03),
-        ncol=len(legend_entries),
-        frameon=False,
-        fontsize=10,
+        ncol = 4,
+        frameon=True,
+        fontsize=14,
     )
 
     fig.tight_layout(
-        rect=[0, 0.12, 1, 1]
+        rect=[0, 0.25, 1, 1]
     )
 
     # ------------------------------------------------------------------
@@ -282,15 +293,15 @@ def plot_arc_qualitative(
 if __name__ == "__main__":
     repository_root = Path(__file__).resolve().parents[1]
 
-    for i in range(10):
+    for i in range(100):
 
         # One selected iteration for each arc half-width.
         arc_half_widths = [
-            0.20,
+            0.1
         ]
 
         iteration_indices = [
-            i
+         i
         ]
 
         save_directory = (
@@ -307,5 +318,5 @@ if __name__ == "__main__":
             iteration_indices=iteration_indices,
             save_directory=save_directory,
             show=False,
-            png_name=f"arc_{i}"
+            png_name=f"arc_{i}_source_diff.png"
         )

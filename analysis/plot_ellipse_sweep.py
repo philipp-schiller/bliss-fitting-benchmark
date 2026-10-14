@@ -40,7 +40,7 @@ LINESTYLES = [
 
 def trimmed_nanmean(
     values: np.ndarray,
-    proportion_to_cut: float = 0.1,
+    proportion_to_cut: float = 0.0,
 ) -> float:
     """
     Compute a trimmed mean after removing NaN and infinite values.
@@ -124,6 +124,7 @@ def collect_ellipse_sweep(
     return {
         "values": sweep_values,
         "labels": expected_labels or [],
+        "result_directories": [Path(d) for d in result_directories],
         "center_errors": center_errors,
         "area_errors": area_errors,
         "shape_errors": shape_errors,
@@ -168,7 +169,7 @@ def plot_ellipse_sweep(
         ),
         (
             sweep_data["center_errors"],
-            r"Avg. centre deviation $E_c$",
+            r"Avg. center deviation $E_c$",
         ),
         (
             sweep_data["shape_errors"],

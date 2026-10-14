@@ -117,7 +117,7 @@ def plot_noise_qualitative(
         # Plot limits based only on the ground-truth ellipse
         # --------------------------------------------------------------
 
-        canonical_ground_truth = canonicalize_ellipse_params(
+        canonical_ground_truth, _ = canonicalize_ellipse_params(
             shape_gt
         )
 
@@ -177,7 +177,7 @@ def plot_noise_qualitative(
                 )
                 continue
 
-            canonical_fitted_params = (
+            canonical_fitted_params, _ = (
                 canonicalize_ellipse_params(
                     fitted_params
                 )
@@ -308,12 +308,19 @@ if __name__ == "__main__":
         # One selected iteration for each fixed noise variance.
         noise_variances = [
             0.010,
+            0.020,
+            0.030,
+            0.040,
             0.050,
+            0.060,
+            0.070,
+            0.080,
             0.090,
+            0.100
         ]
 
         iteration_indices = [
-            i, i, i
+            i, i, i, i, i, i, i, i, i, i
         ]
 
         save_directory = (
