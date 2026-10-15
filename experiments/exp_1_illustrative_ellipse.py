@@ -23,8 +23,9 @@ shape = Ellipse()
 # we define BLISS fitters here:
 noise_prior =  GaussianPrior(mean=np.array([0.0225]), cov=np.array([0.0001]))
 noise_bounds = [(0.001, 0.05)]
-source_prior = GaussianPrior(mean=np.array([0.3, 0.20]), cov=np.diag([10, 0.00065]))
-source_bounds = [(0, 1), (0.175, 0.225)]
+source_prior = GaussianPrior(mean=np.array([0.3, 0.20]), cov=np.diag([10, 0.00016]))
+#source_bounds = [(0, 1), (0.175, 0.225)]
+source_bounds = [(0, 1), (0.01, 0.5)]
 
 # now we define init_values for source_density and noise function
 source_init = np.array([0.3, 0.20])
@@ -87,7 +88,7 @@ if __name__ == "__main__":
     pointcloud_directory = f"../results/isotropic_illustrative/pointclouds"
     result_directory = f"../results/isotropic_illustrative"
 
-    RUN_EXPERIMENT = False
+    RUN_EXPERIMENT = True
 
     if RUN_EXPERIMENT:
         result = run_experiment(

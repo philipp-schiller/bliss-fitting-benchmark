@@ -191,21 +191,30 @@ def _ellipsoid_par(init_center, R, t) -> np.ndarray:
     center = t + R @ init_center
 
     Bm = R @ R.T
-    evals, V = np.linalg.eigh(0.5 * (Bm + Bm.T))  # ascending, like MATLAB eig on symmetric input
+    evals, V = np.linalg.eigh(0.5 * (Bm + Bm.T))
+
+    # sort descending: a >= b >= c
+    idx = np.argsort(evals)[::-1]
+    evals = evals[idx]
+    V = V[:, idx]
+
     a, b, c = np.sqrt(np.maximum(evals, 0.0))
 
-    # An ellipsoid is invariant to the sign of its axes. The Euler extraction below
-    # needs a proper rotation (det = +1); flip the 3rd axis if necessary.
+    # Ensure proper rotation
     if np.linalg.det(V) < 0:
-        V[:, 2] = -V[:, 2]
+        V[:, 2] *= -1
 
-    # R = Rz(alpha) @ Ry(beta) @ Rx(gamma)
     alpha = np.arctan2(V[1, 0], V[0, 0])
     beta = np.arctan2(-V[2, 0], np.hypot(V[0, 0], V[1, 0]))
     gamma = np.arctan2(V[2, 1], V[2, 2])
 
-    return np.array([center[0], center[1], center[2], a, b / a, c / a, alpha, beta, gamma])
-
+    return np.array([
+        center[0], center[1], center[2],
+        a,
+        b / a,
+        c / a,
+        alpha, beta, gamma
+    ])
 
 # --------------------------------------------------------------------------- #
 # Fitter

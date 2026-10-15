@@ -98,7 +98,7 @@ def robust_init(data: np.ndarray, rdos_threshold: float = 2.0):
 # to outliers, and Bayesian in the sense of maximizing a posterior over the
 # correspondence + parameters jointly (an EM / variational treatment).
 
-def _e_step(X, T, sigma2, outlier, vol):
+def _e_step__(X, T, sigma2, outlier, vol):
     """Vectorized equivalent of cpd_comp() in precompute.c."""
     n, d = X.shape
     m = T.shape[0]
@@ -121,6 +121,53 @@ def _e_step(X, T, sigma2, outlier, vol):
 
     E = -np.log(sp_total).sum() + d * n * np.log(sigma2) / 2.0 - n * np.log(1.0 - outlier)
     return P1, Pt1, Px, PM, E
+
+def _e_step(X, T, sigma2, outlier, vol):
+    """
+    CPD E-step without outlier model.
+
+    Parameters
+    ----------
+    X : (N, D) array
+        Data points.
+    T : (M, D) array
+        Template / transformed model points.
+    sigma2 : float
+        Current variance.
+
+    Returns
+    -------
+    P1 : (M,) array
+    Pt1 : (N,) array
+    Px : (M, D) array
+    W : (N, M) array
+        Posterior correspondence probabilities.
+    E : float
+        Negative log-likelihood (up to constants).
+    """
+    n, d = X.shape
+
+    # squared distances
+    diff2 = ((X[:, None, :] - T[None, :, :]) ** 2).sum(axis=2)
+
+    # Gaussian affinity matrix
+    P = np.exp(-diff2 / (2.0 * sigma2))
+
+    # normalization per observation
+    sp = P.sum(axis=1)
+
+    # posterior correspondences
+    W = P / sp[:, None]
+
+    # sufficient statistics
+    P1 = W.sum(axis=0)
+    Pt1 = np.ones(n)
+    Px = W.T @ X
+
+    # objective (up to additive constants)
+    E = -np.log(sp).sum() + 0.5 * d * n * np.log(sigma2)
+
+    return P1, Pt1, Px, W, E
 
 
 def solve_affine_em(X, Y, tol=1e-8, outliers=1e-6, vol=1.0, max_it=200):
@@ -202,7 +249,7 @@ def ellipse_params_from_affine(init_center, R, t) -> tuple[np.ndarray, np.ndarra
 # Top-level driver  (demo.m, specialized to 2D)
 # --------------------------------------------------------------------------
 
-def fit_ellipse(points: np.ndarray, m_init: int = 100, rdos_threshold: float = 2.0,
+def fit_ellipse(points: np.ndarray, m_init: int = 100, rdos_threshold: float = np.inf,
                  tol: float = 1e-8, max_it: int = 200) -> EllipseFit:
     """
     Fit an ellipse to 2D scattered points, robust to outliers, using the

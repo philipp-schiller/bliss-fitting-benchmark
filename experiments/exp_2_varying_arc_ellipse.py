@@ -221,7 +221,9 @@ def make_arc_length_experiment(
         name="BLISS_exact",
         source_density=exact_source,
         noise_function=exact_noise,
-        shape_bounds=shape_bounds
+        shape_bounds=shape_bounds,
+        source_init=np.array([0.375]),
+        source_bounds=[(0, 1)]  # the arc length
     )
 
     return ExperimentConfig(
@@ -267,7 +269,7 @@ def make_arc_length_experiment(
     )
 
 
-RUN_EXPERIMENT = True
+RUN_EXPERIMENT = False
 
 
 if __name__ == "__main__":
@@ -359,7 +361,7 @@ if __name__ == "__main__":
 
     plot_ellipse_boxplot_summary(
         sweep_data,
-        coverage_indices=[4, 2, 0],  # 60%,40%,20%
+        coverage_indices=[4, 0],  # 60%,40%,20%
         x_label_template="Arc coverage {value:.0f}%",
         value_transform=lambda w: w,
         save_path= plot_directory / "coverage_boxplots.png",

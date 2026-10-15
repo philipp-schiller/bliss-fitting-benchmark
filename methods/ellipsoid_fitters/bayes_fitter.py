@@ -13,6 +13,7 @@ from bayes_shape_fitting.models.shapes.ellipsoid import Ellipsoid_R
 
 from bayes_shape_fitting.inference.fit import fit
 
+from methods.ellipsoid_fitters.ellipsoid_utils import orient_south_pole_towards_scanner
 
 
 class BayesFitter(BaseEllipsoidFitter):
@@ -28,6 +29,7 @@ class BayesFitter(BaseEllipsoidFitter):
             shape_bounds=None,
             source_bounds=None,
             noise_bounds=None,
+            optimizer=None
     ):
         self.name = name
         self.source_density = source_density
@@ -38,10 +40,11 @@ class BayesFitter(BaseEllipsoidFitter):
         self.shape_bounds = shape_bounds
         self.source_bounds = source_bounds
         self.noise_bounds = noise_bounds
+        self.optimizer = optimizer
 
     def fit(self, points: np.ndarray, source_density: SourceDensity = None, noise_function: NoiseFunction = None,
         shape_init: np.ndarray = None, source_init: np.ndarray = None, noise_init: np.ndarray = None,
-        shape_bounds = None, source_bounds = None, noise_bounds = None, minimize_kwargs = None, *args, ** kwargs) -> np.ndarray:
+        shape_bounds = None, source_bounds = None, noise_bounds = None, optimizer = None, minimize_kwargs = None, *args, ** kwargs) -> np.ndarray:
 
         # use instance defaults, but allow call-time override
         source_density = source_density or self.source_density
@@ -51,10 +54,21 @@ class BayesFitter(BaseEllipsoidFitter):
         shape_bounds = shape_bounds if shape_bounds is not None else self.shape_bounds
         source_bounds = source_bounds if source_bounds is not None else self.source_bounds
         noise_bounds = noise_bounds if noise_bounds is not None else self.noise_bounds
+        optimizer = optimizer or self.optimizer
+
+        if optimizer is None:
+            optimizer = ECMOptimizer(verbose=False, scale_factor=1, max_iter=7, inner_max_iter=15, methods={
+                'shape': 'L-BFGS-B',
+                'source': "Powell",
+                'noise': 'Powell'
+            })
 
         shape = Ellipsoid_R()
 
         init = shape.initial_fit(points)
+
+        scanner = np.array([0, 0, 10])
+        init = orient_south_pole_towards_scanner(init, scanner)
 
         likelihood = MarginalLikelihood(
             shape=shape,
@@ -63,23 +77,8 @@ class BayesFitter(BaseEllipsoidFitter):
             num_samples=60,
         )
 
-        optimizer = ECMOptimizer(verbose=True, scale_factor=1, max_iter=7, inner_max_iter=15, methods={
-            'shape': 'L-BFGS-B',
-            'source': "Powell",
-            'noise': 'Powell'
-        })
-
         fit_result = fit(points=points, shape=shape, likelihood=likelihood, shape_init=init, noise_init=noise_init, source_init=source_init, shape_bounds=shape_bounds, source_bounds=source_bounds, noise_bounds=noise_bounds, optimizer=optimizer)
 
-        # now we plot the basic setup
-        """plotter = ShapePlotter3D()
-        fig, ax =  plotter.plot_shape(shape, fit_result.shape_params,  label="Fitted Surface", color="green")
-        plotter.plot_shape(shape, init, ax=ax, label="Initial Fit", color="orange")
-        plotter.plot_observations(observations=points, ax=ax)
-
-        animator = ShapePlotterAnimations3D()
-        ani = animator.animate_optimization_result(fit_result, shape, source_density, ax)
-        plt.show()"""
 
         return fit_result.shape_params
 

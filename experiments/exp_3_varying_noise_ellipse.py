@@ -159,7 +159,6 @@ def make_noise_experiment(
     source_bounds_strong = [
         (0.0, 1.0),
         (0.1, 0.5)
-        #(ARC_HALF_WIDTH - 0.05, ARC_HALF_WIDTH + 0.05)
     ]
 
     # ------------------------------------------------------------------
@@ -175,29 +174,7 @@ def make_noise_experiment(
         ]),
     )
 
-    strong_noise_radius = (
-        1.96 * np.sqrt(strong_noise_prior_variance)
-    )
-
-    noise_bounds_weak = [
-        (
-            max(
-                0.0001,
-                sigma_sq_prior - 0.1,
-            ),
-            sigma_sq_prior + 0.1,
-        )
-    ]
-
-    noise_bounds_strong = [
-        (
-            max(
-                0.0,
-                sigma_sq_prior - strong_noise_radius,
-            ),
-            sigma_sq_prior + strong_noise_radius,
-        )
-    ]
+    noise_bounds = [(0.0001, np.inf)]
 
     source_init = np.array([
         0.375,
@@ -205,7 +182,7 @@ def make_noise_experiment(
     ])
 
     noise_init = np.array([
-        0.05,
+        sigma_sq,
     ])
 
     # ------------------------------------------------------------------
@@ -231,7 +208,7 @@ def make_noise_experiment(
         noise_init=noise_init.copy(),
 
         source_bounds=source_bounds_weak,
-        noise_bounds=noise_bounds_weak,
+        noise_bounds=noise_bounds,
     )
 
     # ------------------------------------------------------------------
@@ -258,7 +235,7 @@ def make_noise_experiment(
         noise_init=noise_init.copy(),
 
         source_bounds=source_bounds_strong,
-        noise_bounds=noise_bounds_strong,
+        noise_bounds=noise_bounds,
     )
 
     # ------------------------------------------------------------------
@@ -279,7 +256,8 @@ def make_noise_experiment(
             dim_param=shape.parameter_dim,
             dim_ambient=shape.ambient_dim,
         ),
-        optimizer=MAPOptimizer()
+        source_init=np.array([0.375]),
+        source_bounds=[(0, 1)]  # the arc length
     )
 
     # The runner updates BLISS_exact.fixed_params after each resampling.
@@ -334,7 +312,7 @@ def make_noise_experiment(
 # Run or load the complete noise sweep
 # ---------------------------------------------------------------------------
 
-RUN_EXPERIMENT = True
+RUN_EXPERIMENT = False
 
 if __name__ == "__main__":
     repository_root = Path(__file__).resolve().parents[1]
@@ -438,7 +416,7 @@ if __name__ == "__main__":
 
     plot_ellipse_boxplot_summary(
         sweep_data,
-        coverage_indices=[0, 4, 9],
+        coverage_indices=[0, 5, 9],
         x_label_template=r"Noise variance $\sigma^2 = {value:g}$",
         save_path="noise_boxplots.png",
         show=True
@@ -449,7 +427,7 @@ if __name__ == "__main__":
         x_label=r"Noise variance $\sigma^2$",
         save_path=(
                 plot_directory
-                / "noise_variance_bias_sweep_bounds.png"
+                / "noise_variance_bias_sweep.png"
         ),
         show=True,
     )

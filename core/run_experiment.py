@@ -4,6 +4,8 @@ import time
 import numpy as np
 from tqdm import tqdm
 
+from bayes_shape_fitting.inference.source_densitites import UniformSourceDensity, PartiallyFixedDensity
+
 from core.experiment_config import ExperimentConfig
 from core.sweep_result import SweepResult
 from core.measurement import save_measurement
@@ -103,10 +105,24 @@ def run_experiment(
 
                 # we give the exact parameters to the exact BLISS version if there
                 if getattr(fitter, "name", None) == "BLISS_exact":
-                    fitter.source_density.fixed_params = np.asarray(
+                    """fitter.source_density.fixed_params = np.asarray(
+                        config.source_params,
+                        dtype=float,
+                    ).copy()"""
+
+                    # we fix the arc extent
+                    source_param = np.asarray(
                         config.source_params,
                         dtype=float,
                     ).copy()
+
+                    if isinstance(fitter.source_density, PartiallyFixedDensity):
+                        fitter.source_density.fixed_params = {1:source_param[1]}
+                    else:
+                        fitter.source_density = PartiallyFixedDensity(
+                            fitter.source_density,
+                            fixed_params={1: source_param[1]},
+                        )
 
                     noise_params = np.asarray(
                         config.noise_params,

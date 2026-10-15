@@ -41,7 +41,7 @@ LINESTYLES = [
 
 def trimmed_nanmean(
     values: np.ndarray,
-    proportion_to_cut: float = 0.1,
+    proportion_to_cut: float = 0.0,
 ) -> float:
     """
     Compute a trimmed mean after removing NaN and infinite values.
@@ -60,11 +60,24 @@ def trimmed_nanmean(
         )
     )
 
+def nanmedian(values: np.ndarray) -> float:
+    """
+    Compute the median after removing NaN and infinite values.
+    """
+    values = np.asarray(values, dtype=float)
+    values = values[np.isfinite(values)]
+
+    if values.size == 0:
+        return np.nan
+
+    return float(np.median(values))
+
 
 def collect_ellipsoid_sweep(
     sweep_values: Sequence[float],
     result_directories: Sequence[str | Path],
-    reducer: MetricReducer = trimmed_nanmean,
+    reducer: MetricReducer = nanmedian,
+    time_reducer: MetricReducer = trimmed_nanmean,
 ) -> dict:
     """
     Load and aggregate an ellipsoid sweep.
@@ -120,7 +133,7 @@ def collect_ellipsoid_sweep(
             )
 
             fitting_times.setdefault(method, []).append(
-                reducer(time_values)
+                time_reducer(time_values)
             )
 
     return {
@@ -166,19 +179,19 @@ def plot_ellipsoid_sweep(
     panels = [
         (
             sweep_data["volume_errors"],
-            r"Avg. volume deviation $E_{\mathrm{volume}}$",
+            r"Median volume deviation $E_{\mathrm{volume}}$",
         ),
         (
             sweep_data["center_errors"],
-            r"Avg. center deviation $E_c$",
+            r"Median center deviation $E_c$",
         ),
         (
             sweep_data["shape_errors"],
-            r"Avg. shape deviation $E_{\mathrm{shape}}$",
+            r"Median shape deviation $E_{\mathrm{shape}}$",
         ),
         (
             sweep_data["fitting_times"],
-            "Avg. computation time (s)",
+            "Mean computation time (s)",
         ),
     ]
 

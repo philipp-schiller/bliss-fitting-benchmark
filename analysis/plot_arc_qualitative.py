@@ -297,11 +297,11 @@ if __name__ == "__main__":
 
         # One selected iteration for each arc half-width.
         arc_half_widths = [
-            0.1
+            0.3,0.2,0.1
         ]
 
         iteration_indices = [
-         i
+         i,i,i
         ]
 
         save_directory = (
@@ -318,5 +318,5 @@ if __name__ == "__main__":
             iteration_indices=iteration_indices,
             save_directory=save_directory,
             show=False,
-            png_name=f"arc_{i}_source_diff.png"
+            png_name=f"arc_{i}.png"
         )

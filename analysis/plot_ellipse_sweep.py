@@ -59,11 +59,24 @@ def trimmed_nanmean(
         )
     )
 
+def nanmedian(values: np.ndarray) -> float:
+    """
+    Compute the median after removing NaN and infinite values.
+    """
+    values = np.asarray(values, dtype=float)
+    values = values[np.isfinite(values)]
+
+    if values.size == 0:
+        return np.nan
+
+    return float(np.median(values))
+
 
 def collect_ellipse_sweep(
     sweep_values: Sequence[float],
     result_directories: Sequence[str | Path],
-    reducer: MetricReducer = trimmed_nanmean,
+    reducer: MetricReducer = nanmedian,
+    time_reducer: MetricReducer = trimmed_nanmean
 ) -> dict:
     """
     Load and aggregate an ellipse sweep.
@@ -118,7 +131,7 @@ def collect_ellipse_sweep(
             )
 
             fitting_times.setdefault(method, []).append(
-                reducer(time_values)
+                time_reducer(time_values)
             )
 
     return {
@@ -165,19 +178,19 @@ def plot_ellipse_sweep(
     panels = [
         (
             sweep_data["area_errors"],
-            r"Avg. area deviation $E_{\mathrm{area}}$",
+            r"Median area deviation $E_{\mathrm{area}}$",
         ),
         (
             sweep_data["center_errors"],
-            r"Avg. center deviation $E_c$",
+            r"Median center deviation $E_c$",
         ),
         (
             sweep_data["shape_errors"],
-            r"Avg. Shape deviation $E_{\mathrm{shape}}$",
+            r"Median shape deviation $E_{\mathrm{shape}}$",
         ),
         (
             sweep_data["fitting_times"],
-            "Avg. computation time (s)",
+            "Mean computation time (s)",
         ),
     ]
 
@@ -196,7 +209,7 @@ def plot_ellipse_sweep(
 
             plot_values = np.asarray(values, dtype=float).copy()
 
-            plot_values[plot_values > 1e3] = np.nan
+            plot_values[plot_values > 1e6] = np.nan
 
             ax.plot(
                 sweep_values,
