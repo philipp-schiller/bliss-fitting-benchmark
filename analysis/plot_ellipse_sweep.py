@@ -15,6 +15,10 @@ from metrics.ellipse_metrics import (
 
 MetricReducer = Callable[[np.ndarray], float]
 
+CENTER_FAILURE_THRESHOLD = 2.5
+AREA_FAILURE_THRESHOLD = 10
+SHAPE_FAILURE_THRESHOLD = 11
+
 # Distinguishable in both color and grayscale.
 MARKERS = [
     "o",   # circle
@@ -72,6 +76,14 @@ def nanmedian(values: np.ndarray) -> float:
     return float(np.median(values))
 
 
+def reducer_label(name: str) -> str:
+    mapping = {
+        "nanmedian": "Median",
+        "trimmed_nanmean": "Mean",
+        "nanmean": "Mean",
+    }
+    return mapping.get(name, name.replace("_", " ").title())
+
 def collect_ellipse_sweep(
     sweep_values: Sequence[float],
     result_directories: Sequence[str | Path],
@@ -96,6 +108,7 @@ def collect_ellipse_sweep(
     area_errors: dict[str, list[float]] = {}
     shape_errors: dict[str, list[float]] = {}
     fitting_times: dict[str, list[float]] = {}
+    failure_rates: dict[str, list[float]] = {}
 
     expected_labels = None
 
@@ -134,6 +147,21 @@ def collect_ellipse_sweep(
                 time_reducer(time_values)
             )
 
+            failures = (
+                    ~np.isfinite(center_values)
+                    | ~np.isfinite(area_values)
+                    | ~np.isfinite(shape_values)
+                    | (center_values > CENTER_FAILURE_THRESHOLD)
+                    | (area_values > AREA_FAILURE_THRESHOLD)
+                    | (shape_values > SHAPE_FAILURE_THRESHOLD)
+            )
+
+            failure_rate = np.mean(failures)
+
+            failure_rates.setdefault(method, []).append(
+                failure_rate
+            )
+
     return {
         "values": sweep_values,
         "labels": expected_labels or [],
@@ -142,8 +170,9 @@ def collect_ellipse_sweep(
         "area_errors": area_errors,
         "shape_errors": shape_errors,
         "fitting_times": fitting_times,
+        "error_reducer": reducer.__name__,
+        "failure_rates": failure_rates,
     }
-
 
 def plot_ellipse_sweep(
     sweep_data: dict,
@@ -171,30 +200,43 @@ def plot_ellipse_sweep(
 
     fig, axes = plt.subplots(
         1,
-        4,
-        figsize=(12.5, 3.8),
+        5,
+        figsize=(15.5, 3.9),
+    )
+
+    error_label = reducer_label(
+        sweep_data.get("error_reducer", "nanmedian")
     )
 
     panels = [
         (
             sweep_data["area_errors"],
-            r"Median area deviation $E_{\mathrm{area}}$",
+            rf"{error_label} area dev. $E_{{\mathrm{{area}}}}$",
+            AREA_FAILURE_THRESHOLD,
         ),
         (
             sweep_data["center_errors"],
-            r"Median center deviation $E_c$",
+            rf"{error_label} center dev. $E_c$",
+            CENTER_FAILURE_THRESHOLD,
         ),
         (
             sweep_data["shape_errors"],
-            r"Median shape deviation $E_{\mathrm{shape}}$",
+            rf"{error_label} shape dev. $E_{{\mathrm{{shape}}}}$",
+            SHAPE_FAILURE_THRESHOLD,
         ),
         (
             sweep_data["fitting_times"],
             "Mean computation time (s)",
+            None,
+        ),
+        (
+            sweep_data["failure_rates"],
+            "Failure rate (%)",
+            None,
         ),
     ]
 
-    for panel_index, (values_by_method, y_label) in enumerate(
+    for panel_index, (values_by_method, y_label, threshold) in enumerate(
         panels
     ):
         ax = axes[panel_index]
@@ -209,7 +251,10 @@ def plot_ellipse_sweep(
 
             plot_values = np.asarray(values, dtype=float).copy()
 
-            plot_values[plot_values > 1e6] = np.nan
+            plot_values[plot_values > 1e5] = np.nan
+
+            if y_label == "Failure rate (%)":
+                plot_values *= 100
 
             ax.plot(
                 sweep_values,
@@ -222,12 +267,12 @@ def plot_ellipse_sweep(
 
         ax.set_xlabel(
             x_label,
-            fontsize=12,
+            fontsize=14,
         )
 
         ax.set_ylabel(
             y_label,
-            fontsize=12,
+            fontsize=14,
         )
 
         ax.grid(
@@ -237,6 +282,28 @@ def plot_ellipse_sweep(
 
         if log_error_axes and panel_index < 3:
             ax.set_yscale("log")
+
+        """if threshold is not None:
+            ax.axhline(
+                threshold,
+                color="black",
+                linestyle="--",
+                linewidth=1.2,
+                alpha=0.7,
+                zorder=0,
+            )
+
+        if threshold is not None:
+            ax.text(
+                0.98,
+                threshold,
+                "Failure criterion",
+                transform=ax.get_yaxis_transform(),
+                ha="right",
+                va="bottom",
+                fontsize=9,
+                color="black",
+            )"""
 
         if invert_x_axis:
             ax.invert_xaxis()
@@ -248,7 +315,7 @@ def plot_ellipse_sweep(
         legend_labels,
         loc="lower center",
         ncol=len(legend_labels),
-        fontsize=12,
+        fontsize=14,
     )
 
     fig.tight_layout()

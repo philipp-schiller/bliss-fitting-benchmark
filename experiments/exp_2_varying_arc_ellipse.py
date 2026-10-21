@@ -21,7 +21,7 @@ from methods.ellipse_fitters.geometric_ls import GeometricEllipseFitter
 
 from analysis.plot_ellipse_sweep import (
     collect_ellipse_sweep,
-    plot_ellipse_sweep,
+    plot_ellipse_sweep, trimmed_nanmean, nanmedian,
 )
 
 from analysis.plot_ellipse_sweep_boxplot import plot_ellipse_boxplot_summary, plot_ellipse_bias_sweep
@@ -340,6 +340,7 @@ if __name__ == "__main__":
     sweep_data = collect_ellipse_sweep(
         sweep_values=arc_coverages,
         result_directories=result_directories,
+        reducer= nanmedian,
     )
 
     plot_directory = (
@@ -353,7 +354,7 @@ if __name__ == "__main__":
     plot_ellipse_sweep(
         sweep_data=sweep_data,
         x_label="Arc Coverage (%)",
-        save_path=plot_directory / "arc_coverage_sweep.png",
+        save_path=plot_directory / "arc_coverage_sweep_median.png",
         invert_x_axis=True,
         log_error_axes=True,
         show=True,
@@ -361,10 +362,10 @@ if __name__ == "__main__":
 
     plot_ellipse_boxplot_summary(
         sweep_data,
-        coverage_indices=[4, 0],  # 60%,40%,20%
+        coverage_indices=[4, 2, 0],  # 60%,40%,20%
         x_label_template="Arc coverage {value:.0f}%",
         value_transform=lambda w: w,
-        save_path= plot_directory / "coverage_boxplots.png",
+        save_path= plot_directory / "coverage_boxplots_median.png",
         show=True
     )
 
@@ -372,6 +373,6 @@ if __name__ == "__main__":
         sweep_data,
         x_label="Arc coverage (%)",
         invert_x_axis=True,
-        save_path="coverage_bias_sweep.png",
+        save_path="coverage_bias_sweep_median.png",
         show=True,
     )

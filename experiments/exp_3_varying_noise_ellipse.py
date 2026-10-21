@@ -19,7 +19,7 @@ from methods.ellipse_fitters.geometric_ls import GeometricEllipseFitter
 
 from analysis.plot_ellipse_sweep import (
     collect_ellipse_sweep,
-    plot_ellipse_sweep,
+    plot_ellipse_sweep, nanmedian, trimmed_nanmean
 )
 from analysis.plot_ellipse_sweep_boxplot import plot_ellipse_boxplot_summary, plot_ellipse_bias_sweep
 
@@ -392,6 +392,7 @@ if __name__ == "__main__":
     sweep_data = collect_ellipse_sweep(
         sweep_values=noise_variances,
         result_directories=result_directories,
+        reducer=nanmedian
     )
 
     plot_directory = (
@@ -417,8 +418,11 @@ if __name__ == "__main__":
     plot_ellipse_boxplot_summary(
         sweep_data,
         coverage_indices=[0, 5, 9],
-        x_label_template=r"Noise variance $\sigma^2 = {value:g}$",
-        save_path="noise_boxplots.png",
+        x_label_template=r"$\sigma^2 = {value:g}$",
+        save_path=(
+            plot_directory
+            / "noise_boxplots.png"
+        ),
         show=True
     )
 

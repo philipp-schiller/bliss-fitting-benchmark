@@ -12,6 +12,9 @@ from metrics.ellipsoid_metrics import (
     compute_ellipsoid_metrics,
 )
 
+CENTER_FAILURE_THRESHOLD = 2.5
+VOLUME_FAILURE_THRESHOLD = 10
+SHAPE_FAILURE_THRESHOLD = 10
 
 MetricReducer = Callable[[np.ndarray], float]
 
@@ -98,6 +101,7 @@ def collect_ellipsoid_sweep(
     volume_errors: dict[str, list[float]] = {}
     shape_errors: dict[str, list[float]] = {}
     fitting_times: dict[str, list[float]] = {}
+    failure_rates: dict[str, list[float]] = {}
 
     expected_labels = None
 
@@ -136,6 +140,21 @@ def collect_ellipsoid_sweep(
                 time_reducer(time_values)
             )
 
+            failures = (
+                    ~np.isfinite(center_values)
+                    | ~np.isfinite(volume_values)
+                    | ~np.isfinite(shape_values)
+                    | (center_values > CENTER_FAILURE_THRESHOLD)
+                    | (volume_values > VOLUME_FAILURE_THRESHOLD)
+                    | (shape_values > SHAPE_FAILURE_THRESHOLD)
+            )
+
+            failure_rate = 100 * np.mean(failures)
+
+            failure_rates.setdefault(method, []).append(
+                failure_rate
+            )
+
     return {
         "values": sweep_values,
         "labels": expected_labels or [],
@@ -143,6 +162,7 @@ def collect_ellipsoid_sweep(
         "volume_errors": volume_errors,
         "shape_errors": shape_errors,
         "fitting_times": fitting_times,
+        "failure_rates": failure_rates,
     }
 
 
@@ -172,26 +192,30 @@ def plot_ellipsoid_sweep(
 
     fig, axes = plt.subplots(
         1,
-        4,
-        figsize=(12.5, 3.8),
+        5,
+        figsize=(15.5, 3.8),
     )
 
     panels = [
         (
             sweep_data["volume_errors"],
-            r"Median volume deviation $E_{\mathrm{volume}}$",
+            r"Median volume dev. $E_{\mathrm{volume}}$",
         ),
         (
             sweep_data["center_errors"],
-            r"Median center deviation $E_c$",
+            r"Median center dev. $E_c$",
         ),
         (
             sweep_data["shape_errors"],
-            r"Median shape deviation $E_{\mathrm{shape}}$",
+            r"Median shape dev. $E_{\mathrm{shape}}$",
         ),
         (
             sweep_data["fitting_times"],
             "Mean computation time (s)",
+        ),
+        (
+            sweep_data["failure_rates"],
+            "Failure rate (%)",
         ),
     ]
 
@@ -224,12 +248,12 @@ def plot_ellipsoid_sweep(
 
         ax.set_xlabel(
             x_label,
-            fontsize=12,
+            fontsize=14,
         )
 
         ax.set_ylabel(
             y_label,
-            fontsize=12,
+            fontsize=14,
         )
 
         ax.grid(
@@ -250,7 +274,7 @@ def plot_ellipsoid_sweep(
         legend_labels,
         loc="lower center",
         ncol=len(legend_labels),
-        fontsize=12,
+        fontsize=14,
     )
 
     fig.tight_layout()

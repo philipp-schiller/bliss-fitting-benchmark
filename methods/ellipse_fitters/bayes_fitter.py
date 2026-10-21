@@ -126,10 +126,15 @@ class BayesFitter(BaseEllipseFitter):
             num_samples=300,
         )
 
-        fit_result = standard_fit(points=points, shape=shape, likelihood=likelihood, shape_init=shape_init,
+        """fit_result = standard_fit(points=points, shape=shape, likelihood=likelihood, shape_init=shape_init,
                          source_init=source_init, noise_init = noise_init, shape_bounds=shape_bounds,
                          source_bounds=source_bounds, noise_bounds = noise_bounds,
-                         optimizer=optimizer)
+                         optimizer=optimizer)"""
+
+        fit_result = standard_fit(points=points, shape=shape, source_density = source_density, noise_function = noise_function, shape_init=shape_init,
+                                  source_init=source_init, noise_init=noise_init, shape_bounds=shape_bounds,
+                                  source_bounds=source_bounds, noise_bounds=noise_bounds,
+                                  optimizer=optimizer)
 
         if plot:
             plotter = ShapePlotter2D()

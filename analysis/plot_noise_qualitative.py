@@ -44,9 +44,11 @@ def plot_noise_qualitative(
     fig, axes = plt.subplots(
         1,
         n_panels,
-        figsize=(3.3 * n_panels, 3.3),
+        figsize=(8.2,3.4),
         squeeze=False,
     )
+
+    fig.subplots_adjust(wspace=0.05)
 
     axes = axes.ravel()
 
@@ -126,8 +128,8 @@ def plot_noise_qualitative(
             abs(canonical_ground_truth[3]),
         )
 
-        margin_factor_x = 1.7
-        margin_factor_y = 1.9
+        margin_factor_x = 1.3
+        margin_factor_y = 1.15
 
         ax.set_xlim(
             canonical_ground_truth[0]
@@ -224,47 +226,56 @@ def plot_noise_qualitative(
             observations[:, 0],
             observations[:, 1],
             s=10,
-            alpha=0.35,
-            color="gray",
-            label="Observations",
+            alpha=0.55,
+            color="black",
             zorder=1,
         )
 
         ax.set_xlabel(
-            rf"$\sigma^2 = {sigma_sq:.3f}$",
-            fontsize=10,
+            rf"$\sigma^2 = {sigma_sq:g}$",
+            fontsize=14,
         )
 
-    # ------------------------------------------------------------------
-    # Shared legend
-    # ------------------------------------------------------------------
+        # ------------------------------------------------------------------
+        # Shared legend
+        # ------------------------------------------------------------------
 
-    legend_entries = {}
+        reorder = lambda hl, nc: (sum((lis[i::nc] for i in range(nc)), []) for lis in hl)
 
-    for ax in axes:
-        handles, legend_labels = (
-            ax.get_legend_handles_labels()
+        legend_entries = {}
+
+        for ax in axes:
+            handles, legend_labels = (
+                ax.get_legend_handles_labels()
+            )
+
+            for handle, label in zip(
+                    handles,
+                    legend_labels,
+            ):
+                if label and label not in legend_entries:
+                    legend_entries[label] = handle
+
+        handles, labels = reorder(
+            (
+                list(legend_entries.values()),
+                list(legend_entries.keys()),
+            ),
+            4,
         )
 
-        for handle, label in zip(
+        fig.legend(
             handles,
-            legend_labels,
-        ):
-            if label and label not in legend_entries:
-                legend_entries[label] = handle
-
-    fig.legend(
-        legend_entries.values(),
-        legend_entries.keys(),
-        loc="lower center",
-        bbox_to_anchor=(0.5, -0.03),
-        ncol=len(legend_entries),
-        frameon=False,
-        fontsize=10,
-    )
+            labels,
+            loc="lower center",
+            bbox_to_anchor=(0.5, -0.03),
+            ncol=4,
+            frameon=True,
+            fontsize=14,
+        )
 
     fig.tight_layout(
-        rect=[0, 0.12, 1, 1]
+        rect=[0, 0.25, 1, 1]
     )
 
     # ------------------------------------------------------------------
@@ -308,19 +319,19 @@ if __name__ == "__main__":
         # One selected iteration for each fixed noise variance.
         noise_variances = [
             0.010,
-            0.020,
-            0.030,
-            0.040,
+            #0.020,
+            #0.030,
+            #0.040,
             0.050,
-            0.060,
-            0.070,
-            0.080,
-            0.090,
+            #0.060,
+            #0.070,
+            #0.080,
+            #0.090,
             0.100
         ]
 
         iteration_indices = [
-            i, i, i, i, i, i, i, i, i, i
+            i, i, i,# i, i, i, i, i, i, i
         ]
 
         save_directory = (
@@ -337,5 +348,5 @@ if __name__ == "__main__":
             iteration_indices=iteration_indices,
             save_directory=save_directory,
             show=False,
-            png_name=f"noise_{i}"
+            png_name=f"noise_qual{i}"
         )
