@@ -5,10 +5,9 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
-from bayes_shape_fitting.visualization.plotting_2d import (
+from bliss.visualization.plotting_2d import (
     ShapePlotter2D,
 )
-from networkx.algorithms.smallworld import sigma
 
 from core.sweep_result import SweepResult
 from experiments.exp_2_varying_arc_ellipse import make_arc_length_experiment

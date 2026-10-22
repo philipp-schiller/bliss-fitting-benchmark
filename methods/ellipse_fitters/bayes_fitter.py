@@ -7,19 +7,19 @@ from methods.ellipse_fitters.geometric_ls import _algebraic_ellipse_fit
 from methods.ellipse_fitters.ellipse_utils import get_ellipse_params, canonicalize_ellipse_params
 from methods.ellipse_fitters.self_normalized import SelfNormalizedFitter
 
-from bayes_shape_fitting.visualization.plotting_2d import ShapePlotter2D
-from bayes_shape_fitting.visualization.animation_2d import ShapePlotterAnimations
+from bliss.visualization.plotting_2d import ShapePlotter2D
+from bliss.visualization.animation_2d import ShapePlotterAnimations
 import matplotlib.pyplot as plt
 
-from bayes_shape_fitting.inference.samplers.ecm_estimation import ECMOptimizer
-from bayes_shape_fitting.inference.samplers.map_estimation import MAPOptimizer
-from bayes_shape_fitting.inference.likelihoods import MarginalLikelihood
-from bayes_shape_fitting.inference.noise_functions import NoiseFunction
-from bayes_shape_fitting.inference.posterior import MarginalPosterior
-from bayes_shape_fitting.inference.source_densitites import SourceDensity
-from bayes_shape_fitting.models.shapes.ellipse import Ellipse
-from bayes_shape_fitting.models.shapes.ellipse_reparametrized import Ellipse_R
-from bayes_shape_fitting.inference.fit import fit as standard_fit
+from bliss.inference.samplers.ecm_estimation import ECMOptimizer
+from bliss.inference.samplers.map_estimation import MAPOptimizer
+from bliss.inference.likelihoods import MarginalLikelihood
+from bliss.inference.noise_functions import NoiseFunction
+from bliss.inference.posterior import MarginalPosterior
+from bliss.inference.source_densitites import SourceDensity
+from bliss.models.shapes.ellipse import Ellipse
+from bliss.models.shapes.ellipse_reparametrized import Ellipse_R
+from bliss.inference.fit import fit as standard_fit
 
 
 

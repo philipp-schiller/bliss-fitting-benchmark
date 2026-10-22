@@ -4,10 +4,10 @@ from pathlib import Path
 
 import numpy as np
 
-from bayes_shape_fitting.inference.noise_functions import IsotropicNoise
-from bayes_shape_fitting.inference.priors import GaussianPrior
-from bayes_shape_fitting.inference.source_densitites import UniformSourceDensity
-from bayes_shape_fitting.models.shapes.ellipse import Ellipse
+from bliss.inference.noise_functions import IsotropicNoise
+from bliss.inference.priors import GaussianPrior
+from bliss.inference.source_densitites import UniformSourceDensity
+from bliss.models.shapes.ellipse import Ellipse
 
 from core.experiment_config import ExperimentConfig
 from core.run_experiment import run_experiment

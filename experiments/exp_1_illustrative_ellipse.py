@@ -5,10 +5,10 @@ from methods.ellipse_fitters.hyper_renormalization import HyperRenormalizationFi
 from methods.ellipse_fitters.zhao_bayes import BayesianEllipseFitterZhao
 from methods.ellipse_fitters.geometric_ls import GeometricEllipseFitter
 
-from bayes_shape_fitting.inference.noise_functions import IsotropicNoise
-from bayes_shape_fitting.inference.priors import GaussianPrior
-from bayes_shape_fitting.inference.source_densitites import UniformSourceDensity
-from bayes_shape_fitting.models.shapes.ellipse import Ellipse
+from bliss.inference.noise_functions import IsotropicNoise
+from bliss.inference.priors import GaussianPrior
+from bliss.inference.source_densitites import UniformSourceDensity
+from bliss.models.shapes.ellipse import Ellipse
 
 from core.experiment_config import ExperimentConfig
 from core.run_experiment import run_experiment
@@ -88,7 +88,7 @@ if __name__ == "__main__":
     pointcloud_directory = f"../results/isotropic_illustrative/pointclouds"
     result_directory = f"../results/isotropic_illustrative"
 
-    RUN_EXPERIMENT = True
+    RUN_EXPERIMENT = False
 
     if RUN_EXPERIMENT:
         result = run_experiment(

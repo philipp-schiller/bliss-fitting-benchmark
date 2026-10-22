@@ -4,15 +4,15 @@ from pathlib import Path
 
 import numpy as np
 
-from bayes_shape_fitting.inference.noise_functions import (
+from bliss.inference.noise_functions import (
     IsotropicNoise,
 )
-from bayes_shape_fitting.inference.priors import GaussianPrior
-from bayes_shape_fitting.inference.source_densitites import (
+from bliss.inference.priors import GaussianPrior
+from bliss.inference.source_densitites import (
     PartiallyFixedDensity,
     UniformSourceDensity,
 )
-from bayes_shape_fitting.models.shapes.ellipsoid import (
+from bliss.models.shapes.ellipsoid import (
     Ellipsoid_R,
 )
 

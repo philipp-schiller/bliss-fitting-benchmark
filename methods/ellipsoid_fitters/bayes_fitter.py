@@ -1,17 +1,17 @@
 import numpy as np
-from bayes_shape_fitting.visualization.animation_3d import ShapePlotterAnimations3D
-from bayes_shape_fitting.visualization.plotting_3d import ShapePlotter3D
+from bliss.visualization.animation_3d import ShapePlotterAnimations3D
+from bliss.visualization.plotting_3d import ShapePlotter3D
 import matplotlib.pyplot as plt
 
 from methods.ellipsoid_fitters.base import BaseEllipsoidFitter
-from bayes_shape_fitting.inference.samplers.ecm_estimation import ECMOptimizer
-from bayes_shape_fitting.inference.likelihoods import MarginalLikelihood
-from bayes_shape_fitting.inference.noise_functions import NoiseFunction
-from bayes_shape_fitting.inference.posterior import MarginalPosterior
-from bayes_shape_fitting.inference.source_densitites import SourceDensity
-from bayes_shape_fitting.models.shapes.ellipsoid import Ellipsoid_R
+from bliss.inference.samplers.ecm_estimation import ECMOptimizer
+from bliss.inference.likelihoods import MarginalLikelihood
+from bliss.inference.noise_functions import NoiseFunction
+from bliss.inference.posterior import MarginalPosterior
+from bliss.inference.source_densitites import SourceDensity
+from bliss.models.shapes.ellipsoid import Ellipsoid_R
 
-from bayes_shape_fitting.inference.fit import fit
+from bliss.inference.fit import fit
 
 from methods.ellipsoid_fitters.ellipsoid_utils import orient_south_pole_towards_scanner
 

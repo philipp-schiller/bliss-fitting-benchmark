@@ -4,7 +4,7 @@ import time
 import numpy as np
 from tqdm import tqdm
 
-from bayes_shape_fitting.inference.source_densitites import UniformSourceDensity, PartiallyFixedDensity
+from bliss.inference.source_densitites import UniformSourceDensity, PartiallyFixedDensity
 
 from core.experiment_config import ExperimentConfig
 from core.sweep_result import SweepResult

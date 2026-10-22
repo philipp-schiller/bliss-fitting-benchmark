@@ -6,7 +6,7 @@ from pathlib import Path
 import math
 
 import matplotlib.pyplot as plt
-from bayes_shape_fitting.visualization.plotting_2d import ShapePlotter2D
+from bliss.visualization.plotting_2d import ShapePlotter2D
 from matplotlib import patches
 import numpy as np
 
